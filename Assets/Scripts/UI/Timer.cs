@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Timer : MonoBehaviour
+public class Timer : MonoSingleton<Timer>
 {
     [Header("计时器设置")]
     [SerializeField] private float totalTime = 370f;
@@ -13,6 +13,8 @@ public class Timer : MonoBehaviour
     [SerializeField] private Color warningColor = Color.red;
     [SerializeField] private Text timeText;
     [SerializeField] private float warningThreshold = 5f;
+    [SerializeField] private Text rescuedText;
+
 
     private float currentTime;
     private bool isTimerRunning;
@@ -22,32 +24,26 @@ public class Timer : MonoBehaviour
     {
         originalColor = fillImage.color;
 
-        fillRect.sizeDelta = new Vector2(0, fillRect.sizeDelta.y);
-        timeText.text = "";
         isTimerRunning = false;
+        ResetUI();
     }
 
     void Update()
     {
-        if (!GameManager.Instance.isGameStarted || GameManager.Instance.isGameOver) return;
-        // 只有当游戏开始且计时器未运行时才初始化
-        if (GameManager.Instance.isGameStarted && !isTimerRunning)
-        {
-            InitializeTimer();
-        }
-
         // 游戏运行中更新计时器
         if (isTimerRunning)
         {
             UpdateTimer();
         }
+        rescuedText.text = "已救出NPC数量：" + GameManager.Instance.rescuedNPC;
     }
 
-    private void InitializeTimer()
+    public void ResetUI()
     {
-        currentTime = totalTime;
-        fillRect.sizeDelta = new Vector2(maxWidth, fillRect.sizeDelta.y);
-        isTimerRunning = true;
+        fillRect.sizeDelta = new Vector2(0, fillRect.sizeDelta.y);
+        timeText.text = "";
+        timeText.gameObject.SetActive(false);
+        rescuedText.gameObject.SetActive(false);
     }
 
     private void UpdateTimer()
@@ -79,12 +75,17 @@ public class Timer : MonoBehaviour
 
     private void OnTimeEnd()
     {
-        Debug.Log("时间到！");
+        //Debug.Log("时间到！");
         GameManager.Instance.EndGame();
     }
 
     public void ResetTimer()
     {
-        InitializeTimer();
+        currentTime = totalTime;
+        fillRect.sizeDelta = new Vector2(maxWidth, fillRect.sizeDelta.y);
+        fillImage.color = originalColor; 
+        isTimerRunning = true;
+        timeText.gameObject.SetActive(true);
+        rescuedText.gameObject.SetActive(true);
     }
 }

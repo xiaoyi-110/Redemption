@@ -12,29 +12,18 @@ public class Window : InteractableObject
 
     private bool isBroken = false;
 
-    public override void OnInteract() {
+    public override void OnInteract(PlayerController player) {
 
         if (!isBroken) return;
 
-        if (player != null && player.currentState == PlayerState.Carrying)
-        {
-            player.carriedNPC = null;
-            player.TransitionState(PlayerState.Normal);
-            GameManager.Instance.rescuedNPC++;
-            Debug.Log("已救出 NPC！");
-            if (GameManager.Instance.rescuedNPC == GameManager.Instance.maxNPC)
-            {
-                GameManager.Instance.isGameWon = true;
-                GameManager.Instance.EndGame();
-            }
-        }
+        player.RescueNPCFromWindow(this);
     }
     public void Break()
     {
         if (isBroken) return;
         isBroken = true;
 
-        Debug.Log("窗户被砸开，可以跳出！");
+        //Debug.Log("窗户被砸开，可以跳出！");
     }
 
     public bool IsBroken()

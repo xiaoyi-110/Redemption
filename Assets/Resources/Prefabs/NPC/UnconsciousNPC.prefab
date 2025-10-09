@@ -86,7 +86,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!114 &1398326936898965386
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -100,13 +100,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   anim: {fileID: 5217235789774392493}
-  rb: {fileID: 0}
   player: {fileID: 0}
   npcLevel: 0
   npcID: 1
   hallucinationDuration: 10
   unconsciousDuration: 5
-  carriedSprite: {fileID: 0}
   initialState: 1
 --- !u!95 &5217235789774392493
 Animator:

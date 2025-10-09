@@ -87,7 +87,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!114 &188152956741658371
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -100,23 +100,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d1156d22b0eac94aa0f90eb08efc20a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemName: "\u71C3\u70E7\u7269"
-  itemIcon: {fileID: 21300000, guid: 981c785022ed7fc4981a17d9849a534d, type: 3}
-  itemDescription: "\u71C3\u70E7\u7269"
-  carryType: 3
-  destroyOnUse: 1
-  poolTag: Items
-  prefabReference: {fileID: 7055682786665693090}
-  useTrigger: 0
-  isContinuousUse: 0
+  itemData: {fileID: 11400000, guid: deebd01ff508b8449a97e0898d9a2560, type: 2}
+  originalPrefab: {fileID: 7055682786665693090}
   level: 0
   isBurning: 0
   burnInterval: 1
-  smokeSystem: {fileID: 0}
+  smokeLevel: 0
+  maxSmokeCount: 10
   targetRenderer: {fileID: 106692122223116937}
   visualSprite: {fileID: 21300000, guid: 981c785022ed7fc4981a17d9849a534d, type: 3}
   Flame: {fileID: 1903742977107458354}
   flameOffset: {x: 0.15, y: 0.6, z: -0.3}
+  smokeOffest: {x: 0, y: 0.9, z: -0.9}
   itemCollider: {fileID: 6880322085305709655}
 --- !u!61 &6880322085305709655
 BoxCollider2D:
@@ -154,7 +149,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0}
-    oldSize: {x: 2.0859375, y: 1.7734375}
+    oldSize: {x: 1.335, y: 1.135}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

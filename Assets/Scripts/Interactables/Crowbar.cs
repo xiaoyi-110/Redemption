@@ -7,25 +7,22 @@ public class Crowbar : InteractableObject
     protected override void Start()
     {
         base.Start();
-        destroyOnUse = false;
-        useTrigger = UseTrigger.KeyF;
+        //destroyOnUse = false;
+        //useTrigger = UseTrigger.KeyF;
     }
 
-    protected override void HandleUse()
+    protected override void HandleUse(PlayerController player)
     {
         if (player == null) return;
-        MetroDoor door = player.nearestMetroDoor;
+        MetroDoor door = player.PlayerInteractor.GetNearestMetroDoor();
 
-        if (door != null &&
-            (door.currentFault == MetroDoor.FaultType.Type1 ||
-             door.currentFault == MetroDoor.FaultType.Type2))
+        if (door != null)
         {
-            Debug.Log("车门已打开！");
-            door.OpenDoor();
+            door.TryOpenWithCrowbar();
         }
         else
         {
-            Debug.Log("找不到地铁门");
+            //Debug.Log("找不到地铁门");
         }
     }
 }

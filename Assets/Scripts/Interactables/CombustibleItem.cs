@@ -1,7 +1,6 @@
 using System.Collections;
 using UnityEngine;
-using static UnityEditor.Progress;
-public class CombustibleItem : InteractableObject
+public class CombustibleItem : InteractableObject,IExtinguishable
 {
     public enum CombustibleLevel { L1, L2, L3, Sober }
 
@@ -11,7 +10,7 @@ public class CombustibleItem : InteractableObject
     public float burnInterval = 1f;
 
     [Header("烟雾设置")]
-    public SmokeSystem smokeSystem;
+    public SmokeSystem.SmokeLevel smokeLevel;
     private Coroutine burnCoroutine;
 
     [Header("烟雾生成控制")]
@@ -30,51 +29,37 @@ public class CombustibleItem : InteractableObject
     private Rigidbody2D rb;
     public BoxCollider2D itemCollider;
 
-    protected override void Start()
+    protected override void Awake()
     {
-        base.Start();
+        base.Awake();
         rb = GetComponent<Rigidbody2D>();
-        smokeSystem = FindObjectOfType<SmokeSystem>();
         if (rb == null) rb = gameObject.AddComponent<Rigidbody2D>();
         itemCollider = rb.GetComponent<BoxCollider2D>();
         rb.isKinematic = true;
-        destroyOnUse = true;
 
         // 应用贴图
         if (targetRenderer != null && visualSprite != null)
         {
             targetRenderer.sprite = visualSprite;
         }
+        smokeLevel = ConvertToSmokeLevel(level);
     }
 
-    public override void OnInteract()
+    public override void OnInteract(PlayerController player)
     {
-        if (!isBurning)
+        if (isBurning)
         {
-            if (InventorySystem.Instance.AddItem(this))
-            {
-                gameObject.SetActive(false);
-            }
-        }
-    }
-    public override void UseItem()
-    {
-        if (!isEquipped)
-        {
-            Debug.LogWarning($"未装备 {itemName}，无法使用！");
+            Debug.Log("燃烧物正在燃烧，无法拾取！");
             return;
         }
-
-        HandleUse();
+        base.OnInteract(player);
     }
-
-    protected override void HandleUse()
+    protected override void HandleUse(PlayerController player)
     {
-        ThrowAndIgnite();
+        ThrowAndIgnite(player);
     }
-    private void ThrowAndIgnite()
+    private void ThrowAndIgnite(PlayerController player)
     {
-        ResetLayer();
         transform.SetParent(null);
         rb.isKinematic = false;
         transform.position = player.transform.position;
@@ -89,14 +74,6 @@ public class CombustibleItem : InteractableObject
         rb.isKinematic = true;
         rb.velocity = Vector2.zero;
 
-        if (destroyOnUse)
-        {
-            Debug.Log("销毁一次性物品");
-
-            if (player.equippedItem == this)
-                player.equippedItem = null;
-            InventorySystem.Instance.UpdateEquippedUI();
-        }
         Ignite();
     }
 
@@ -115,11 +92,11 @@ public class CombustibleItem : InteractableObject
                 Flame.SetActive(true);
             }
             burnCoroutine = StartCoroutine(GenerateSmoke());
-            if (AudioManager.Instance != null && AudioManager.Instance.fireClip != null)
+            if (AudioManager.Instance != null)
             {
-                AudioManager.Instance.PlayLoopSFX(AudioManager.Instance.fireClip);
+                //AudioManager.Instance.PlayLoopSFX(AudioManager.Instance.fireClip);
             }
-            Debug.Log($"{level} 级燃烧物开始燃烧！");
+            //Debug.Log($"{level} 级燃烧物开始燃烧！");
         }
     }
 
@@ -140,7 +117,7 @@ public class CombustibleItem : InteractableObject
                 StopCoroutine(burnCoroutine);
             if (AudioManager.Instance != null)
             {
-                AudioManager.Instance.StopLoopSFX();
+                //AudioManager.Instance.StopLoopSFX();
             }
             Debug.Log("燃烧物已扑灭！");
         }
@@ -148,14 +125,12 @@ public class CombustibleItem : InteractableObject
 
     private IEnumerator GenerateSmoke()
     {
-        SmokeSystem.SmokeLevel smokeLevel = ConvertToSmokeLevel(level);
-
         for (int i = 0; i < maxSmokeCount; i++)
         {
             if (!isBurning)
                 break;
 
-            smokeSystem.AddSmoke(transform.position + smokeOffest, smokeLevel, 1, Quaternion.Euler(-135f, 0f, 0f));
+            SmokeSystem.Instance?.AddSmoke(transform.position + smokeOffest, smokeLevel, 1, Quaternion.Euler(-135f, 0f, 0f));
 
             yield return new WaitForSeconds(burnInterval);
         }
@@ -163,13 +138,10 @@ public class CombustibleItem : InteractableObject
         Debug.Log("燃烧结束，物体销毁。");
         if (AudioManager.Instance != null)
         {
-            AudioManager.Instance.StopLoopSFX();
+            //AudioManager.Instance.StopLoopSFX();
         }
         Destroy(gameObject);
     }
-
-
-
 
     private SmokeSystem.SmokeLevel ConvertToSmokeLevel(CombustibleLevel level)
     {
@@ -187,7 +159,7 @@ public class CombustibleItem : InteractableObject
     {
         if (isBurning)
         {
-            Debug.Log("燃烧物正在燃烧，无法装备！");
+            //Debug.Log("燃烧物正在燃烧，无法装备！");
             return;
         }
         base.OnEquip(parent);

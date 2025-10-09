@@ -1,137 +1,149 @@
+using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEditor.Progress;
 
-public abstract class InteractableObject : MonoBehaviour
+public abstract class InteractableObject : Entity
 {
-    public string itemName;
-    public Sprite itemIcon;
-    protected bool isEquipped = false;
+    [Header("Item Data")]
+    public ItemData itemData;
 
-    protected PlayerController player;
-    [TextArea(3, 5)]
-    public string itemDescription;
-
-    public enum CarryType { None, Mask, NPC, Item }
-    public enum UseTrigger { KeyF,RightClick,OnEquip}
-
-    [Header("携带设置")]
-    public CarryType carryType = CarryType.None;
+    public bool IsEquipped { get; private set; } = false; 
     private SpriteRenderer spriteRenderer;
 
+    private int equippedLayer;
+    private int originalLayer;
 
-    [Header("物品属性")]
-    public bool destroyOnUse = false;
-    public string poolTag = "Items";
-    public GameObject prefabReference;
-    public UseTrigger useTrigger;
-    public bool isContinuousUse = false;
-    //[SerializeField] protected Transform ground;
+    public GameObject originalPrefab;
 
+    public string ItemName => itemData.itemName;
+    public Sprite ItemIcon => itemData.itemIcon;
+    public string ItemDescription => itemData.itemDescription;
+    public CarryType CarryType => itemData.carryType;
+    public UseTrigger UseTrigger => itemData.useTrigger;
+    public bool DestroyOnUse => itemData.destroyOnUse;
+    public bool IsContinuousUse => itemData.isContinuousUse;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer == null)
         {
-            Debug.LogError($"{gameObject.name} 缺少 SpriteRenderer 组件！");
+            Debug.LogError($"{gameObject.name} is missing SpriteRenderer!");
             enabled = false; 
         }
-    }
-    protected virtual void Start()
-    {
-        player = InventorySystem.Instance?.GetPlayer();
-        if (player == null)
+
+        if (itemData == null)
         {
-            Debug.LogWarning("PlayerController 未正确设置，交互可能失败！");
+            Debug.LogError($"{gameObject.name} is missing ItemData!");
+        }
+        else
+        {
+            spriteRenderer.sprite = itemData.itemIcon;
+        }
+        originalLayer = gameObject.layer;
+        equippedLayer = LayerMask.NameToLayer("Equipped");
+    }
+
+    private void OnEnable()
+    {
+        if (EventManager.Instance != null) {
+            EventManager.Instance.RegisterEvent<OnItemDestroyRequestEventArgs>(OnItemDestroyRequested); 
         }
     }
 
-    public virtual void OnInteract()
+    private void OnDisable()
     {
-        if (InventorySystem.Instance.AddItem(this))
+        if (EventManager.Instance != null)
         {
-            if (InventorySystem.Instance.isFirstAdd == false)
-            {
-                InventorySystem.Instance.isFirstAdd = true;
-                InventorySystem.Instance.ShowAddTips();
-            }
-            gameObject.SetActive(false); // 禁用当前实例
-            player.nearestInteractable = null;
-            AudioManager.Instance.PlayPickupItemSFX();
+            EventManager.Instance.UnRegisterEvent<OnItemDestroyRequestEventArgs>(OnItemDestroyRequested);
         }
     }
+
+    private void OnItemDestroyRequested(object sender, OnItemDestroyRequestEventArgs args)
+    {
+        if (args.Interactable == this)
+        {
+            Debug.Log($"Received destroy request for {itemData.itemName}. Destroying object.");
+            PlayerEquipmentManager.Instance.UnequipDestroyedItem(this);
+            Destroy(gameObject);
+            EventManager.Instance?.TriggerEvent(this, EquipmentUIChangedEventArgs.Create());
+        }
+    }
+    public virtual void OnInteract(PlayerController player)
+    {
+        if (InventoryData.Instance.AddItem(itemData))
+            {
+                Debug.Log($"Picked up {itemData.itemName}. Destroying physical object.");
+                Destroy(gameObject);
+            }
+        else
+            {
+                Debug.LogWarning($"Inventory is full! Cannot pick up {itemData.itemName}.");
+            }
+        }
 
     public virtual void OnEquip(Transform parent)
     {
-        if (isEquipped) return;
-        isEquipped = true;
+        if (IsEquipped) return;
+        IsEquipped = true;
         transform.SetParent(parent);
         transform.localPosition = Vector2.zero;
         transform.localRotation = Quaternion.identity;
+
+        if (equippedLayer != -1)
+        {
+            gameObject.layer = equippedLayer;
+        }
+        else
+        {
+            Debug.LogError("Can't find EquippedLayer");
+        }
         HandleEquip();
     }
 
     public virtual void OnUnequip()
     {
-        if (!isEquipped) return;
+        if (!IsEquipped) return;
 
-        isEquipped = false;
-        gameObject.SetActive(false);
+        IsEquipped = false;
+        if (originalLayer != -1)
+        {
+            gameObject.layer = originalLayer;
+        }
         HandleUnequip();
     }
 
-    public virtual void UseItem()
+    public virtual void UseItem(PlayerController player)
     {
-        if (!isEquipped)
+        if (!IsEquipped)
         {
-            Debug.LogWarning($"未装备 {itemName}，无法使用！");
+            Debug.LogWarning($"Item {itemData.itemName} not equipped!");
             return;
         }
 
-        HandleUse();
+        HandleUse(player);
 
-        if (destroyOnUse)
+        if (DestroyOnUse)
         {
-            Debug.Log("销毁一次性物品");
-
-            if (player.equippedItem == this)
-                player.equippedItem = null;
-            if (player.equippedMask == this)
-                player.equippedMask = null;
-            Destroy(gameObject);
-            InventorySystem.Instance.UpdateEquippedUI();
-        }
-        else if(!isContinuousUse)
-        {
-            Debug.Log("非一次性物品可继续使用");
+            Debug.Log($"Consuming {itemData.itemName}. 发出销毁请求。");
+            EventManager.Instance.TriggerEvent(this,OnItemDestroyRequestEventArgs.Create(this) );
         }
     }
 
 
-    protected virtual void HandleEquip() { }
+    protected virtual void HandleEquip() {
+        gameObject.SetActive(true);
+    }
     protected virtual void HandleUnequip() { }
-    protected virtual void HandleUse() { }
+    protected virtual void HandleUse(PlayerController player) { }
 
-    public void SetEquippedLayer()
-    {
-        spriteRenderer.sortingLayerName = "AboveCharacter";
-    }
-
-    public void ResetLayer()
-    {
-        spriteRenderer.sortingLayerName = "Interactables";
-    }
-    public string GetDescription()
-    {
-        return $"{itemName}\n{itemDescription}";
-    }
 
     void OnDrawGizmos()
     {
-        if (this.gameObject.activeInHierarchy) // 确保物品处于活动状态
+        if (this.gameObject.activeInHierarchy) 
         {
-            Gizmos.color = Color.red; // 设置颜色为红色
-            Gizmos.DrawSphere(transform.position, 0.2f); // 在物品位置绘制球体
+            Gizmos.color = Color.red; 
+            Gizmos.DrawSphere(transform.position, 0.2f); 
         }
     }
 

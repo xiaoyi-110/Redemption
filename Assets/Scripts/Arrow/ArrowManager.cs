@@ -1,29 +1,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ArrowManager : MonoBehaviour
+public class ArrowManager : MonoSingleton<ArrowManager>
 {
-    public static ArrowManager S;
 
     [Header("箭头配置")]
     public GameObject arrowPrefab;
     public Transform arrowsHolder;
 
     [Header("音效")]
-    [SerializeField] private AudioSource victorySound;
-    [SerializeField] private AudioSource missSound;
+    //[SerializeField] private AudioSource victorySound;
+    //[SerializeField] private AudioSource missSound;
 
     private Queue<Arrow> arrows = new Queue<Arrow>();
     private Arrow currentArrow;
     private MetroDoor currentDoor;
 
     public float waveTime = 9f;
-    public static bool isFinish;
-
-    private void Awake()
-    {
-        S = this;
-    }
+    private bool isFinish;
 
     private void Start()
     {
@@ -33,19 +27,21 @@ public class ArrowManager : MonoBehaviour
     public void CreateWave(int length, MetroDoor door)
     {
         arrowsHolder.gameObject.SetActive(true);
-        Debug.Log($"正在生成箭头，数量: {length}");
+        //Debug.Log($"正在生成箭头，数量: {length}");
         arrows.Clear();
         isFinish = false;
         currentDoor = door;
 
         for (int i = 0; i < length; i++)
         {
-            GameObject arrowObj = Instantiate(arrowPrefab, arrowsHolder.position, Quaternion.identity, arrowsHolder);
-            arrowObj.transform.localPosition += new Vector3(i * 100, 0, 0);
+            GameObject arrowObj = ObjectPoolManager.Instance.GetObject(arrowPrefab);
+            arrowObj.transform.SetParent(arrowsHolder);
+            
 
             Arrow arrow = arrowObj.GetComponent<Arrow>();
             int randomDir = Random.Range(0, 4);
             arrow.Setup(randomDir);
+            arrowObj.transform.localPosition += new Vector3(i * 100, 0, 0);
             arrows.Enqueue(arrow);
         }
 
@@ -64,11 +60,11 @@ public class ArrowManager : MonoBehaviour
 
         if (correct)
         {
-            currentArrow.SetFinish();
+            currentArrow.SetToFinishState();
         }
         else
         {
-            currentArrow.SetError();
+            currentArrow.SetToErrorState();
         }
 
         currentDoor?.RecordInput(correct);
@@ -78,7 +74,7 @@ public class ArrowManager : MonoBehaviour
         else
         {
             isFinish = true;
-            Debug.Log($"箭头波完成，总正确数: {currentDoor?.correctInputs}");
+            //Debug.Log($"箭头波完成，总正确数: {currentDoor?.correctInputs}");
         }
     }
 
@@ -93,10 +89,12 @@ public class ArrowManager : MonoBehaviour
 
     public void ClearWave()
     {
-        foreach (Transform arrow in arrowsHolder)
+        for (int i = arrowsHolder.childCount - 1; i >= 0; i--)
         {
-            Destroy(arrow.gameObject);
+            Transform arrow = arrowsHolder.GetChild(i);
+            ObjectPoolManager.Instance.ReturnObject(arrowPrefab, arrow.gameObject);
         }
+
 
         arrows.Clear();
         currentArrow = null;

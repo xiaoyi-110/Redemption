@@ -1,30 +1,28 @@
+using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEngine;
-public class DialogManager : MonoBehaviour
+public class DialogManager : MonoSingleton<DialogManager>
 {
-    public static DialogManager Instance { get; private set; }
-
     // 存储所有NPC的对话数据，字典格式，NPC ID -> 对话列表
     public Dictionary<int, List<DialogueNode>> dialogues = new Dictionary<int, List<DialogueNode>>();
-    private HashSet<int> finishedNpcIds = new HashSet<int>();
+    public HashSet<int> finishedNpcIds = new HashSet<int>();
 
     private DialogueNode currentDialogue;
     private PlayerController player;
 
-    private void Awake()
+    private void OnEnable()
     {
-        // 确保只有一个实例
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        if(EventManager.Instance != null)
+            EventManager.Instance.RegisterEvent<OnOptionSelectedEventArgs>(OnOptionSelected);
+    }
+
+    private void OnDisable()
+    {
+        if (EventManager.Instance != null)
+            EventManager.Instance.UnRegisterEvent<OnOptionSelectedEventArgs>(OnOptionSelected);
     }
 
     public void LoadDialogueFromCSV(string csvPath)
@@ -34,7 +32,7 @@ public class DialogManager : MonoBehaviour
             string csvContent = File.ReadAllText(csvPath);
             List<string> lines = ReadCsvLines(csvContent);
 
-            Debug.Log("开始加载对话数据，文件路径：" + csvPath);
+            //Debug.Log("开始加载对话数据，文件路径：" + csvPath);
 
             for (int i = 1; i < lines.Count; i++) // 跳过头部
             {
@@ -42,7 +40,7 @@ public class DialogManager : MonoBehaviour
 
                 if (fields.Length < 10)
                 {
-                    Debug.LogWarning($"跳过不完整的行：{lines[i]}");
+                    //Debug.LogWarning($"跳过不完整的行：{lines[i]}");
                     continue;
                 }
 
@@ -55,20 +53,20 @@ public class DialogManager : MonoBehaviour
                 int nextDialogue1 = string.IsNullOrEmpty(fields[6]) ? -1 : int.Parse(fields[6]);
                 int nextDialogue2 = string.IsNullOrEmpty(fields[7]) ? -1 : int.Parse(fields[7]);
                 int nextDialogue3 = string.IsNullOrEmpty(fields[8]) ? -1 : int.Parse(fields[8]);
-                GameObject itemRewardPrefab = null;
+                ItemData itemData = null;
 
                 // 解析物品奖励
                 if (!string.IsNullOrEmpty(fields[9]))
                 {
                     string path = fields[9].Trim(); // 防止意外的空格导致路径错误
-                    itemRewardPrefab = Resources.Load<GameObject>(path);
-                    if (itemRewardPrefab == null)
+                    itemData = Resources.Load<ItemData>(path);
+                    if (itemData == null)
                     {
                         Debug.LogWarning($"无法加载预制体，路径：{path}，请检查路径是否正确，以及资源是否放在 Resources 文件夹内。");
                     }
                     else
                     {
-                        Debug.Log($"成功加载物品预制体：{itemRewardPrefab.name}，路径：{path}");
+                        //Debug.Log($"成功加载物品预制体：{itemData.name}，路径：{path}");
                     }
                 }
 
@@ -78,20 +76,20 @@ public class DialogManager : MonoBehaviour
                     npcId, dialogueId, dialogueText,
                     option1, option2, option3,
                     nextDialogue1, nextDialogue2, nextDialogue3,
-                    itemRewardPrefab, npcName
+                    itemData, npcName
                 );
 
                 if (!dialogues.ContainsKey(npcId))
                 {
                     dialogues[npcId] = new List<DialogueNode>();
-                    Debug.Log("新增NPC对话数据，NPC ID：" + npcId);
+                    //Debug.Log("新增NPC对话数据，NPC ID：" + npcId);
                 }
 
                 dialogues[npcId].Add(node);
-                Debug.Log("加载对话节点，NPC ID：" + npcId + "，对话ID：" + dialogueId);
+                //Debug.Log("加载对话节点，NPC ID：" + npcId + "，对话ID：" + dialogueId);
             }
 
-            Debug.Log("对话数据加载完成，共加载 " + dialogues.Count + " 个NPC的对话数据");
+            //Debug.Log("对话数据加载完成，共加载 " + dialogues.Count + " 个NPC的对话数据");
         }
         catch (Exception e)
         {
@@ -202,18 +200,17 @@ public class DialogManager : MonoBehaviour
     }
 
     // 显示当前对话内容和选项
-    public void ShowDialogue()
+    private void ShowDialogue()
     {
         if (currentDialogue == null) return;
-
         // 先显示对话文本
         string[] dialogueLines = new string[] { currentDialogue.dialogueText };
-        UIManager.Instance.ShowDialogue(dialogueLines, OnDialogueComplete, currentDialogue.npcName);
+        UIManager.Instance.OpenPanel("DialoguePanel",dialogueLines,currentDialogue.npcName).Forget();
 
     }
-    private void OnDialogueComplete()
+    public void OnDialogueComplete()
     {
-        Debug.Log("显示按钮");
+        //Debug.Log("显示按钮");
         List<string> options = new List<string>();
 
         if (!string.IsNullOrEmpty(currentDialogue.option1)) options.Add(currentDialogue.option1);
@@ -222,7 +219,7 @@ public class DialogManager : MonoBehaviour
 
         if (options.Count > 0)
         {
-            UIManager.Instance.ShowOptions(options.ToArray(), OnOptionSelected);
+            UIManager.Instance.ShowOptions(options.ToArray());
         }
         else
         {
@@ -244,9 +241,10 @@ public class DialogManager : MonoBehaviour
             }
         }
     }
-    private void OnOptionSelected(int optionIndex)
+    private void OnOptionSelected(object sender, OnOptionSelectedEventArgs args)
     {
-        Debug.Log("选项回调");
+        int optionIndex = args.OptionIndex;
+        //Debug.Log("选项回调");
         int nextDialogueId = -1;
 
         switch (optionIndex)
@@ -268,10 +266,9 @@ public class DialogManager : MonoBehaviour
 
             if (currentDialogue != null)
             {
-                if (currentDialogue.itemRewardPrefab != null)
+                if (currentDialogue.itemData != null)
                 {
-                    Debug.Log("2");
-                    GiveCollectibleItem(currentDialogue.itemRewardPrefab);
+                    GiveCollectibleItem(currentDialogue.itemData);
                 }
                 ShowDialogue();
             }
@@ -290,12 +287,12 @@ public class DialogManager : MonoBehaviour
             finishedNpcIds.Add(currentDialogue.npcId);
         }
 
-        Debug.Log("结束对话");
-        UIManager.Instance.HideDialogue();
+        //Debug.Log("结束对话");
+        UIManager.Instance.ClosePanel("DialoguePanel");
     }
 
     // 通过 npcId 和 dialogueId 获取对应的对话节点
-    public DialogueNode GetDialogueNode(int npcId, int dialogueId)
+    private DialogueNode GetDialogueNode(int npcId, int dialogueId)
     {
         if (dialogues.ContainsKey(npcId))
         {
@@ -305,13 +302,20 @@ public class DialogManager : MonoBehaviour
     }
 
     // 给玩家物品
-    private void GiveCollectibleItem(GameObject itemPrefab)
+    private void GiveCollectibleItem(ItemData itemData)
     {
-        if (itemPrefab == null || player == null) return;
-
-        GameObject itemInstance = Instantiate(itemPrefab);
-
-        player.inventory.AddItem(itemInstance.GetComponent<InteractableObject>());
-        Debug.Log("物品已奖励给玩家！");
+        if (itemData == null)
+        {
+            Debug.LogError("试图奖励空物品数据！");
+            return;
+        }
+        if (InventoryData.Instance.AddItem(itemData))
+        {
+            //Debug.Log($"物品 '{itemData.itemName}' 已奖励给玩家！");
+        }
+        else
+        {
+            Debug.LogWarning($"未能将物品 '{itemData.itemName}' 奖励给玩家，背包可能已满。");
+        }
     }
 }

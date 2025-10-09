@@ -1,5 +1,4 @@
 using UnityEngine;
-using static UnityEditor.Progress;
 
 public class SafetyHammer : InteractableObject
 {
@@ -15,24 +14,24 @@ public class SafetyHammer : InteractableObject
     protected override void Start()
     {
         base.Start();
-        destroyOnUse = false;
-        useTrigger = UseTrigger.RightClick;
+        //destroyOnUse = false;
+        //useTrigger = UseTrigger.RightClick;
     }
 
-    protected override void HandleUse()
+    protected override void HandleUse(PlayerController player)
     {
-        Debug.Log("使用安全锤敲击玻璃");
+        //Debug.Log("使用安全锤敲击玻璃");
 
         // 检查冷却时间
         if (Time.time - lastHitTime < hitCooldown)
         {
-            Debug.Log("冷却时间未到，无法再次使用安全锤！");
+            //Debug.Log("冷却时间未到，无法再次使用安全锤！");
             return;
         }
 
         lastHitTime = Time.time;
 
-        Window targetWindow = GetTargetWindow();
+        Window targetWindow = GetTargetWindow(player);
         if (targetWindow != null)
         {
             float distanceToWindow = Vector2.Distance(player.transform.position, targetWindow.transform.position);
@@ -42,32 +41,32 @@ public class SafetyHammer : InteractableObject
                 {
                     currentHits = 0; 
                     currentTargetWindow = targetWindow; 
-                    Debug.Log("目标窗户已改变，砸击次数已重置！");
+                    //Debug.Log("目标窗户已改变，砸击次数已重置！");
                 }
 
                 currentHits++;
-                Debug.Log($"砸击窗户: {currentHits}/{hitsRequired}");
+                //Debug.Log($"砸击窗户: {currentHits}/{hitsRequired}");
 
                 if (currentHits >= hitsRequired)
                 {
                     targetWindow.Break(); // 破碎窗户
                     currentHits = 0; // 重置砸击次数
                     currentTargetWindow = null; // 重置当前目标窗户
-                    Debug.Log("窗户已破碎！");
+                    //Debug.Log("窗户已破碎！");
                 }
             }
             else
             {
-                Debug.Log("距离窗户太远，无法砸击！");
+                //Debug.Log("距离窗户太远，无法砸击！");
             }
         }
         else
         {
-            Debug.Log("Window is null");
+            //Debug.Log("Window is null");
         }
     }
 
-    private Window GetTargetWindow()
+    private Window GetTargetWindow(PlayerController player)
     {
         if (player == null) return null;
 

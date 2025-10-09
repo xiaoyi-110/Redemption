@@ -17,14 +17,14 @@ public class DialogueNode
     public int nextDialogueId3;
 
     // 物品奖励
-    public GameObject itemRewardPrefab;  // 该节点是否奖励物品
+    public ItemData itemData;  // 该节点是否奖励物品
 
     //npc名字
     public string npcName;
 
     // 构造函数
     public DialogueNode(int npcId, int dialogueId, string dialogueText, string option1, string option2, string option3,
-                    int nextDialogueId1, int nextDialogueId2, int nextDialogueId3, GameObject itemRewardPrefab = null, string npcName = "")
+                    int nextDialogueId1, int nextDialogueId2, int nextDialogueId3, ItemData itemData = null, string npcName = "")
     {
         this.npcId = npcId;
         this.dialogueId = dialogueId;
@@ -35,7 +35,7 @@ public class DialogueNode
         this.nextDialogueId1 = nextDialogueId1;
         this.nextDialogueId2 = nextDialogueId2;
         this.nextDialogueId3 = nextDialogueId3;
-        this.itemRewardPrefab = itemRewardPrefab;
+        this.itemData = itemData;
         this.npcName = npcName;
     }
 }

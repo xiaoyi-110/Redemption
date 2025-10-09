@@ -369,6 +369,8 @@ MonoBehaviour:
   currentFault: 3
   openSpeed: 1
   openSound: {fileID: 0}
+  mainCamera: {fileID: 0}
+  minDistance: 12
   isDancing: 0
   correctInputs: 0
 --- !u!95 &5389475872237570014
@@ -457,7 +459,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: cde4a8ca1c526d0458504c642cf0a60a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -488,4 +490,4 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1

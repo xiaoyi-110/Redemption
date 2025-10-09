@@ -85,7 +85,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!114 &4183329688257743840
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -98,17 +98,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e5d11d86c214fd4e9a403de460f8238, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemName: "\u624B\u7535\u7B52"
-  itemIcon: {fileID: 21300000, guid: ddac8de37953e6243a4a9fa82ae8d6b0, type: 3}
-  itemDescription: 
-  carryType: 3
-  destroyOnUse: 0
-  poolTag: Items
-  prefabReference: {fileID: 6035400581308669045}
-  useTrigger: 0
-  isContinuousUse: 0
+  itemData: {fileID: 11400000, guid: 2f89a70af68eac04b9590bea5ad5b34e, type: 2}
+  originalPrefab: {fileID: 6035400581308669045}
   isFlashlightOn: 0
-  light: {fileID: 0}
+  flashlight: {fileID: 0}
+  onIcon: {fileID: 21300000, guid: 3ea107d4bca6da749bddb24a36c0e74e, type: 3}
+  offIcon: {fileID: 21300000, guid: ddac8de37953e6243a4a9fa82ae8d6b0, type: 3}
 --- !u!61 &4788037166121051901
 BoxCollider2D:
   m_ObjectHideFlags: 0

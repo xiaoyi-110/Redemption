@@ -41,7 +41,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _LerpValue: 0.08
+    - _LerpValue: 0.18
     - _Speed: -1
     m_Colors:
     - _Color1: {r: 1, g: 0, b: 0.1146951, a: 0}

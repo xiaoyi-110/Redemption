@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System;
+using Cysharp.Threading.Tasks;
 public class MetroDoor : MonoBehaviour
 {
     public enum DoorState { Open, Closed, Jammed }
@@ -12,6 +13,7 @@ public class MetroDoor : MonoBehaviour
     [Header("门的状态")]
     public DoorState currentState = DoorState.Closed;
     public FaultType currentFault = FaultType.None;
+    private bool isPowered = false;
 
     [Header("门的属性")]
     public float openSpeed = 1.0f;
@@ -41,13 +43,13 @@ public class MetroDoor : MonoBehaviour
         if (mainCamera == null)
             mainCamera = Camera.main;
 
-        if (ArrowManager.S == null)
-            ArrowManager.S = FindObjectOfType<ArrowManager>();
+        if (ArrowManager.Instance == null)
+            //ArrowManager.Instance = FindObjectOfType<ArrowManager>();
 
         if (MazeManager.instance == null)
             MazeManager.instance = FindObjectOfType<MazeManager>();
 
-        player = GetComponent<PlayerController>();
+        player = FindObjectOfType<PlayerController>();
     }
 
 
@@ -74,21 +76,38 @@ public class MetroDoor : MonoBehaviour
     }
 
 
+    public void SetPowered(bool value)
+    {
+        isPowered = value;
+    }
 
-    public void TryInteract(PlayerController player)
+    public void HandlePower()
+    {
+
+            if (currentFault == MetroDoor.FaultType.Type3 ||
+                currentFault == MetroDoor.FaultType.Type4 ||
+                currentFault == MetroDoor.FaultType.Type5)
+            {
+                SetPowered(true);
+                player.PlayerInteractor.SetPoweredDoor(this);
+                //Debug.Log("车门已通电，请再次按下 F 以修复故障");
+                UIManager.Instance.OpenPanel("MessagePanel", "车门已通电，请再次按下 F 以修复故障").Forget();
+            }
+    }
+    public void TryInteract()
     {
         if (isSolvingPuzzle)
         {
-            Debug.Log("谜题进行中，无法交互");
+            //Debug.Log("谜题进行中，无法交互");
             return;
         }
 
-        if (!Battery.isPowered)
+        if (!isPowered)
         {
-            if (player.equippedItem == null&&(currentFault == FaultType.Type3 || currentFault == FaultType.Type4||currentFault==FaultType.Type5))
+            if (PlayerEquipmentManager.Instance.EquippedItem == null&&(currentFault == FaultType.Type3 || currentFault == FaultType.Type4||currentFault==FaultType.Type5))
             {
-                UIManager.Instance.ShowMessage("需要备用电池才能修复门");
-                Debug.Log("需要备用电池才能修复门！");
+                UIManager.Instance.OpenPanel("MessagePanel", "需要备用电池才能修复门").Forget();
+                //Debug.Log("需要备用电池才能修复门！");
                 return;
             }
         }
@@ -96,11 +115,23 @@ public class MetroDoor : MonoBehaviour
         HandleFaultUpdate(player);
     }
 
+    public void TryOpenWithCrowbar()
+    {
+        if (currentFault == FaultType.Type1 || currentFault == FaultType.Type2)
+        {
+            Debug.Log("车门已打开！");
+            OpenDoor(); 
+        }
+        else
+        {
+            Debug.Log("这个门无法用撬棍打开！");
+        }
+    }
     private void HandleFaultUpdate(PlayerController player)
     {
         if (isSolvingPuzzle)
             return;
-        if (player.equippedItem == null&&currentState==DoorState.Closed)
+        if (PlayerEquipmentManager.Instance.EquippedItem == null&&currentState==DoorState.Closed)
         {
             switch (currentFault)
             {
@@ -121,7 +152,7 @@ public class MetroDoor : MonoBehaviour
     {
         if (currentState == DoorState.Jammed)
         {
-            Debug.Log("门正在打开...");
+            //Debug.Log("门正在打开...");
             currentState = DoorState.Open;
             anim.SetInteger("DoorState", (int)currentState);
             if (openSound)
@@ -129,18 +160,18 @@ public class MetroDoor : MonoBehaviour
         }
         else
         {
-            Debug.Log("门无法打开！");
+            //Debug.Log("门无法打开！");
         }
     }
     #region Arrow
     private void StartArrowPuzzle()
     {
-        Debug.Log("进入QQ炫舞解谜界面...");
+        //Debug.Log("进入QQ炫舞解谜界面...");
         isSolvingPuzzle = true;
         arrowTime = 0f;
-        if (ArrowManager.S != null)
+        if (ArrowManager.Instance != null)
         {
-            ArrowManager.S.CreateWave(10, this);
+            ArrowManager.Instance.CreateWave(10, this);
         }
         else
         {
@@ -154,14 +185,14 @@ public class MetroDoor : MonoBehaviour
     {
         isDancing = false;
         isSolvingPuzzle = false;
-        ArrowManager.S?.ClearWave();
-        Debug.Log($"结束解谜，正确数为 {correctInputs}");
-        UIManager.Instance.ShowMessage("解谜失败，门状态不变!");
+        ArrowManager.Instance?.ClearWave();
+        //Debug.Log($"结束解谜，正确数为 {correctInputs}");
+        UIManager.Instance.OpenPanel("MessagePanel", "解谜失败，门状态不变!").Forget();
 
         if (correctInputs == 10)
         {
-            Debug.Log("QQ炫舞解谜成功，门变为撬棍状态");
-            UIManager.Instance.ShowMessage("解谜成功，门变为卡住状态!");
+            //Debug.Log("QQ炫舞解谜成功，门变为撬棍状态");
+            UIManager.Instance.OpenPanel("MessagePanel", "解谜成功，门变为卡住状态!").Forget();
             currentState = DoorState.Jammed;
             anim.SetInteger("DoorState", (int)currentState);
         }
@@ -179,7 +210,7 @@ public class MetroDoor : MonoBehaviour
     #region Maze
     private void StartMazePuzzle()
     {
-        Debug.Log("进入迷宫解谜界面...");
+        //Debug.Log("进入迷宫解谜界面...");
         isSolvingPuzzle = true;
         //Camera Add new overlay camera.
         SceneManager.sceneLoaded += OnMazeSceneLoaded;
@@ -190,7 +221,7 @@ public class MetroDoor : MonoBehaviour
     {
         if (scene.name == "Maze")
         {
-            Debug.Log("迷宫场景加载完成，开始迷宫解谜逻辑");
+           // Debug.Log("迷宫场景加载完成，开始迷宫解谜逻辑");
 
             CameraManager.instance.OnSceneLoaded(scene, mode);
             MazeManager.instance?.StartMazePuzzle(OnMazeSolved, OnMazeFailed);
@@ -204,13 +235,13 @@ public class MetroDoor : MonoBehaviour
         {
             if (success) // 新增条件判断
             {
-                Debug.Log("迷宫解谜完成，后续操作执行！");
+                //Debug.Log("迷宫解谜完成，后续操作执行！");
                 door.currentFault = MetroDoor.FaultType.Type1;
                 isSolvingPuzzle = false;
             }
             else
             {
-                Debug.Log("解谜失败，不执行后续操作");
+                //Debug.Log("解谜失败，不执行后续操作");
                 isSolvingPuzzle = false;
             }
         }));
@@ -218,21 +249,21 @@ public class MetroDoor : MonoBehaviour
     }
     public IEnumerator StartMazePuzzleWithNoChange(Action<bool> onCompleted) { 
 
-        Debug.Log("进入迷宫解谜界面但不会影响门状态...");
+       // Debug.Log("进入迷宫解谜界面但不会影响门状态...");
         isSolvingPuzzle = true;
         // 定义局部回调函数
         bool isCompleted = false;
         Action onLocalSolved = () =>
         {
-            Debug.Log("迷宫解谜成功，但门状态不变");
-            UIManager.Instance.ShowMessage("按下F进入下一解谜阶段");
+            //Debug.Log("迷宫解谜成功，但门状态不变");
+            UIManager.Instance.OpenPanel("MessagePanel", "按下F进入下一解谜阶段").Forget();
             isCompleted = true;
             onCompleted?.Invoke(true);
         };
 
         Action onLocalFailed = () =>
         {
-            Debug.Log("迷宫解谜失败！");
+            //Debug.Log("迷宫解谜失败！");
             isCompleted = true;
             onCompleted?.Invoke(false);
         };
@@ -252,7 +283,7 @@ public class MetroDoor : MonoBehaviour
         }
         else
         {
-            Debug.LogError("MazeManager 实例未找到！");
+            //Debug.LogError("MazeManager 实例未找到！");
             onCompleted?.Invoke(false);
         }
 
@@ -274,19 +305,19 @@ public class MetroDoor : MonoBehaviour
     }
     private void OnMazeSolved()
     {
-        Debug.Log("迷宫解谜成功，门变为卡住状态");
+        //Debug.Log("迷宫解谜成功，门变为卡住状态");
         isSolvingPuzzle = false;
         StartCoroutine(UnloadMazeScene());
-        UIManager.Instance.ShowMessage("迷宫解谜成功，门变为卡住状态!");
+        UIManager.Instance.OpenPanel("MessagePanel", "迷宫解谜成功，门变为卡住状态!").Forget();
         currentState = DoorState.Jammed;
-        anim.SetInteger("DoorState", (int)currentState);
+        anim.SetInteger("DoorState", (int)currentState);    
     }
 
     private void OnMazeFailed()
     {
-        Debug.Log("迷宫解谜失败！");
+        //Debug.Log("迷宫解谜失败！");
         isSolvingPuzzle = false;
-        UIManager.Instance.ShowMessage("迷宫解谜失败!");
+        UIManager.Instance.OpenPanel("MessagePanel", "迷宫解谜失败!").Forget();
         StartCoroutine(UnloadMazeScene());
     }
 
@@ -296,7 +327,7 @@ public class MetroDoor : MonoBehaviour
         if (mazeScene.isLoaded)
         {
             yield return SceneManager.UnloadSceneAsync(mazeScene);
-            Debug.Log("迷宫场景已卸载");
+            //Debug.Log("迷宫场景已卸载");
             Resources.UnloadUnusedAssets(); // 清理残留资源
         }
     }

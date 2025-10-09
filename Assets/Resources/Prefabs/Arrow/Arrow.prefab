@@ -88,11 +88,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7391df991530fe2439528c452434b26b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  arrowSprites:
+  ArrowSprites:
   - {fileID: 21300000, guid: 0778083db2b26a34a9455bb37ff021c4, type: 3}
   - {fileID: 21300000, guid: c6bef21c7e4b30b45b8ed193a203ab87, type: 3}
   - {fileID: 21300000, guid: 3cc92ac30f1229e4287247ab399b8737, type: 3}
   - {fileID: 21300000, guid: 489febc97626f264f977202b923a17ff, type: 3}
   arrowDir: 0
-  finishColor: {r: 0, g: 1, b: 0.8968959, a: 1}
-  errorColor: {r: 1, g: 0.41823888, b: 0.73907864, a: 1}
+  FinishColor: {r: 0.26729542, g: 1, b: 0.887581, a: 1}
+  ErrorColor: {r: 1, g: 0.6761006, b: 0.9330409, a: 1}
+  DefaultColor: {r: 1, g: 1, b: 1, a: 1}

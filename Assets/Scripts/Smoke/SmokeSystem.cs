@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.UIElements;
 
-public class SmokeSystem : MonoBehaviour
+public class SmokeSystem : MonoSingleton<SmokeSystem>
 {
     public enum SmokeLevel { Sober, Level1, Level2, Level3 }
     public static SmokeSystem S { get; private set; }
@@ -45,26 +45,26 @@ public class SmokeSystem : MonoBehaviour
         new TagLevelPair { tag = "Level3Smoke", level = SmokeLevel.Level3 }
     };
 
-    private Dictionary<Vector2, GameObject> smokeParticles = new Dictionary<Vector2, GameObject>();
+    //private Dictionary<Vector2, GameObject> smokeParticles = new Dictionary<Vector2, GameObject>();
     public List<SmokeArea> activeSmoke = new List<SmokeArea>();
-
+    private Collider2D[] smokeCache = new Collider2D[20];
     private PlayerController player;
 
-    void Awake()
-    {
-        if (S == null) S = this;
-        else Destroy(gameObject);
-        player = FindObjectOfType<PlayerController>();
-    }
 
     void Start()
     {
+        player=FindObjectOfType<PlayerController>();
         InitializeSceneSmoke();
+        StartCoroutine(DetectSmokeRoutine());
     }
 
-    private void Update()
+    private IEnumerator DetectSmokeRoutine()
     {
-        HandleCharacterEnterSmoke(player, player.transform.position);
+        while (true)
+        {
+            yield return new WaitForSeconds(0.25f);
+            HandleCharacterEnterSmoke(player, player.transform.position);
+        }
     }
 
     private void InitializeSceneSmoke()
@@ -74,9 +74,12 @@ public class SmokeSystem : MonoBehaviour
             GameObject[] sceneSmokes = GameObject.FindGameObjectsWithTag(pair.tag);
             foreach (GameObject smokeObj in sceneSmokes)
             {
-                Vector2 position = smokeObj.transform.position;
-                AddSmoke(position, pair.level, initialSmokeAmount, smokeObj.transform.rotation);
-                Destroy(smokeObj);
+                activeSmoke.Add(new SmokeArea
+                {
+                    smokeObject = smokeObj, 
+                    level = pair.level,
+                    amount = initialSmokeAmount
+                });
             }
         }
     }
@@ -84,46 +87,39 @@ public class SmokeSystem : MonoBehaviour
     #region 烟雾管理
     public void AddSmoke(Vector3 position, SmokeLevel level, int amount, Quaternion rotation = default)
     {
-        if (smokeParticles.TryGetValue(position, out GameObject existing))
+        SmokeArea existingSmoke = activeSmoke.Find(s => Vector3.Distance(s.smokeObject.transform.position, position) < 1.0f);
+        if (existingSmoke != null)
         {
-            UpdateExistingSmoke(position, level, amount);
-            return;
-        }
-
-        GameObject prefab = GetParticlePrefab(level);
-        GameObject particle = Instantiate(prefab, position, rotation);
-        particle.transform.position = position;
-        particle.tag = GetTagFromLevel(level);
-
-        var ps = particle.GetComponent<ParticleSystem>();
-        if (ps != null) ps.Play();
-
-        smokeParticles.Add(position, particle);
-        activeSmoke.Add(new SmokeArea
-        {
-            smokeObject = particle,
-            level = level,
-            amount = amount
-        });
-
-    }
-
-    private void UpdateExistingSmoke(Vector2 position, SmokeLevel newLevel, int addAmount)
-    {
-        if (smokeParticles.TryGetValue(position, out GameObject particle))
-        {
-            var smoke = activeSmoke.Find(s => s.smokeObject == particle);
-            if (smoke != null)
+            //如果存在，更新其数据，而不是销毁和重建
+            existingSmoke.amount += amount;
+            if (level > existingSmoke.level)
             {
-                smoke.amount += addAmount;
-                if (newLevel > smoke.level)
-                {
-                    smoke.level = newLevel;
-                    particle.tag = GetTagFromLevel(newLevel);
-                }
+                existingSmoke.level = level;
+                existingSmoke.smokeObject.tag = GetTagFromLevel(level);
             }
         }
+        else
+        {
+            // 如果不存在，则创建新的
+            GameObject prefab = GetParticlePrefab(level);
+            GameObject particle = Instantiate(prefab, position, rotation);
+            particle.transform.position = position;
+            particle.tag = GetTagFromLevel(level);
+
+            var ps = particle.GetComponent<ParticleSystem>();
+            if (ps != null) ps.Play();
+
+            activeSmoke.Add(new SmokeArea
+            {
+                smokeObject = particle,
+                level = level,
+                amount = amount
+            });
+        }
+
+
     }
+
   
     #endregion
 
@@ -131,55 +127,30 @@ public class SmokeSystem : MonoBehaviour
     public SmokeLevel DetectHighestSmokeLevel(Vector2 position)
     {
         SmokeLevel highestLevel = SmokeLevel.Level1;
-        int particlesChecked = 0;
-
-        foreach (var particleObj in smokeParticles.Values.ToList())
+        int count = Physics2D.OverlapCircleNonAlloc(position, detectionRadius, smokeCache, LayerMask.GetMask("Smoke"));
+        //Collider2D[] smokeColliders = Physics2D.OverlapCircleAll(position, detectionRadius, LayerMask.GetMask("Smoke"));
+        if (count== 0)
         {
-            if (particleObj == null)
-            {
-                CleanupDictionary();
-                continue;
-            }
-
-            var ps = particleObj.GetComponent<ParticleSystem>();
-            if (ps == null) continue;
-
-            ParticleSystem.Particle[] particles = new ParticleSystem.Particle[ps.main.maxParticles];
-            int count = ps.GetParticles(particles);
-            particlesChecked += count;
-
-            Vector3 psPos = ps.transform.position;
-
-            for (int i = 0; i < count; i++)
-            {
-                Vector3 particlePos = psPos + particles[i].position;
-                if (Vector2.Distance(particlePos, position) > detectionRadius) continue;
-
-                var currentLevel = GetLevelFromTag(particleObj.tag);
-                if (currentLevel > highestLevel)
-                {
-                    highestLevel = currentLevel;
-                    // 如果已经找到最高等级可提前退出
-                    if (highestLevel == SmokeLevel.Level3) break;
-                }
-            }
-
-            // 如果已经找到最高等级可提前终止检测
-            if (highestLevel == SmokeLevel.Level3) break;
+            return SmokeLevel.Sober;
         }
 
-        //Debug.Log($"检测位置 {position} 最高等级：{highestLevel} | 检查粒子数：{particlesChecked}");
+        for (int i = 0; i < count; i++)
+        {
+            // 找到烟雾对应的等级
+            var currentLevel = GetLevelFromTag(smokeCache[i].tag);
+            if (currentLevel > highestLevel)
+            {
+                highestLevel = currentLevel;
+                // 如果已经找到最高等级，可以提前退出循环
+                if (highestLevel == SmokeLevel.Level3)
+                {
+                    break;
+                }
+            }
+        }
         return highestLevel;
     }
 
-    private void CleanupDictionary()
-    {
-        var nullEntries = smokeParticles.Where(kvp => kvp.Value == null).ToList();
-        foreach (var entry in nullEntries)
-        {
-            smokeParticles.Remove(entry.Key);
-        }
-    }
     #endregion
 
     #region 工具方法
@@ -209,27 +180,7 @@ public class SmokeSystem : MonoBehaviour
     #endregion
 
     #region 调试工具
-    void OnDrawGizmosSelected()
-    {
-        foreach (var entry in smokeParticles)
-        {
-            if (entry.Value == null) continue;
 
-            Gizmos.color = GetLevelColor(GetLevelFromTag(entry.Value.tag));
-            Gizmos.DrawWireSphere(entry.Value.transform.position, detectionRadius);
-        }
-    }
-    private Color GetLevelColor(SmokeLevel level)
-    {
-        return level switch
-        {
-            SmokeLevel.Sober => Color.gray,
-            SmokeLevel.Level1 => Color.green,
-            SmokeLevel.Level2 => Color.yellow,
-            SmokeLevel.Level3 => Color.red,
-            _ => Color.white
-        };
-    }
 
     #endregion
 
@@ -257,14 +208,9 @@ public class SmokeSystem : MonoBehaviour
         switch (level)
         {
             case SmokeLevel.Level2:
-                if (!player.equippedMask)
+                if (!PlayerEquipmentManager.Instance.EquippedMask)
                 {
                     cameraEffects.EnterIllusionWorld();
-                }
-                break;
-            case SmokeLevel.Level3:
-                {
-                    player.BlockMovement();
                 }
                 break;
             case SmokeLevel.Level1:
@@ -278,7 +224,8 @@ public class SmokeSystem : MonoBehaviour
                 {
                     cameraEffects.ReturnFromIllusionWorld();
                 }
-                //TODO:NPC
+                break;
+            default:
                 break;
         }
     }

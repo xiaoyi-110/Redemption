@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -24,12 +25,12 @@ public class CameraEffectsController : MonoBehaviour
             illusionVolume.gameObject.SetActive(true);
         }
         isIllusion = true;
-        if (!(player.equippedItem is SmokeDetector smokeDetector)) { 
-            UIManager.Instance.ShowMessage("你进入了幻觉世界...");
+        if (!(PlayerEquipmentManager.Instance.EquippedItem is SmokeDetector smokeDetector)) { 
+            UIManager.Instance.OpenPanel("MessagePanel","你进入了幻觉世界...").Forget();
         }
         else
         {
-            UIManager.Instance.ShowMessage("危险烟雾，请佩戴防毒面具");
+            UIManager.Instance.OpenPanel("MessagePanel", "危险烟雾，请佩戴防毒面具").Forget();
         }
     }
 
@@ -40,7 +41,7 @@ public class CameraEffectsController : MonoBehaviour
             illusionVolume.gameObject.SetActive(false);
         }
         isIllusion = false;
-        UIManager.Instance.ShowMessage("你恢复了意识。");
+        UIManager.Instance.OpenPanel("MessagePanel", "你恢复了意识。").Forget();
     }
 }
 

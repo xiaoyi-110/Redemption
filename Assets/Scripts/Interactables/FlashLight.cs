@@ -1,29 +1,47 @@
+using System.Drawing;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class Flashlight : InteractableObject
 {
-    [Header("手电筒设置")]
-    public bool isFlashlightOn = false; // 是否开启手电筒
-    public new Light light;
-
+    [Header("Flashlight Settings")]
+    public bool isFlashlightOn = false; 
+    [SerializeField] private Light flashlight;
+    public Sprite onIcon;
+    public Sprite offIcon;
     protected override void Start()
     {
         base.Start();
-        light.gameObject.SetActive(false);
-        light.enabled = true;
+        if (flashlight == null)
+        {
+            PlayerController player = FindObjectOfType<PlayerController>();
+            if (player != null)
+            {
+                flashlight = player.FollowLight;
+            }
+            if (flashlight == null)
+            {
+                Debug.LogError($"{gameObject.name} is missing a Light component!");
+                return;
+            }
+        }
+        flashlight.enabled = false;
     }
     public override void OnUnequip()
     {
         base.OnUnequip();
-        light.enabled = false;
+        flashlight.enabled = false;
         isFlashlightOn = false;
+        EventManager.Instance.TriggerEvent(this, ItemStateChangedEventArgs.Create(this, offIcon));
     }
-    protected override void HandleUse()
-    {
-        light.gameObject.SetActive(true);
-        isFlashlightOn = true;
-        light.enabled = isFlashlightOn;
+    protected override void HandleUse(PlayerController player)
+    {        
+        isFlashlightOn = !isFlashlightOn;
+        flashlight.enabled = isFlashlightOn;
+        
+        Sprite iconToUse = isFlashlightOn ? onIcon : offIcon;
+
+        EventManager.Instance.TriggerEvent(this, ItemStateChangedEventArgs.Create(this, iconToUse));
     }
-    
 }
+   

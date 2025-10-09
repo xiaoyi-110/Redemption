@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,7 +16,7 @@ public class DoorAirWall : MonoBehaviour
 
     void Update()
     {
-        bool shouldBlock = !(player.equippedItem is Flashlight);
+        bool shouldBlock = !(PlayerEquipmentManager.Instance.EquippedItem is Flashlight);
         col2D.enabled = shouldBlock; // 无手电筒时激活碰撞体
     }
 
@@ -23,7 +24,7 @@ public class DoorAirWall : MonoBehaviour
     {
         if (other.collider.CompareTag("Player") && col2D.enabled)
         {
-            UIManager.Instance.ShowMessage("该区域必须携带手电筒才能进入");
+            UIManager.Instance.OpenPanel("MessagePanel", "该区域必须携带手电筒才能进入").Forget();
         }
     }
 }

@@ -1,32 +1,33 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TooltipManager : MonoBehaviour
+public class TooltipManager : MonoSingleton<TooltipManager>
 {
-    public static TooltipManager Instance;
-
-    public GameObject tooltipPanel;
-    public Text tooltipText;
+    [SerializeField] private TooltipUI tooltipUI;
     public Vector2 fixedPosition;
 
-    void Awake()
+    protected override void Awake()
     {
-        Instance = this;
-        tooltipPanel.SetActive(false);
+        base.Awake();
+        tooltipUI.gameObject.SetActive(false);
 
         fixedPosition = new Vector2(0, 0);
     }
 
-    public void Show(string content)
+    public void Show(string text)
     {
-        tooltipText.text = content;
-        tooltipPanel.SetActive(true);
+        if (tooltipUI == null) return;
 
-        tooltipPanel.GetComponent<RectTransform>().anchoredPosition = fixedPosition;
+        tooltipUI.SetText(text);
+        tooltipUI.gameObject.SetActive(true);
+
+        tooltipUI.GetComponent<RectTransform>().anchoredPosition = fixedPosition;
     }
-
     public void Hide()
     {
-        tooltipPanel.SetActive(false);
+        if (tooltipUI != null)
+        {
+            tooltipUI.gameObject.SetActive(false);
+        }
     }
 }

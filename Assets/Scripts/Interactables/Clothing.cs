@@ -1,32 +1,23 @@
 using UnityEngine;
-using System.Collections;
 
 public class Clothing : InteractableObject
 {
-
-
-    protected override void HandleUse()
+    protected override void HandleUse(PlayerController player)
     {
-        ExtinguishNearbyCombustibles();
+        ExtinguishNearbyCombustibles(player);
     }
 
-    private void ExtinguishNearbyCombustibles()
+    private void ExtinguishNearbyCombustibles(PlayerController player)
     {
-        bool extinguished = false;
-        if (player.nearestInteractable != null && player.nearestInteractable.CompareTag("CombustibleItem")) 
-        {
-            CombustibleItem targetCombustible = player.nearestInteractable.GetComponent<CombustibleItem>();
-            if (targetCombustible != null && targetCombustible.isBurning)
-            {
-                targetCombustible.Extinguish();
-                extinguished = true;
-                Debug.Log("燃烧物已扑灭！");
-            }
-        }
+        IExtinguishable target = player.PlayerInteractor.FindNearestExtinguishable();
 
-        if (!extinguished)
+        if (target != null)
+        {      
+            target.Extinguish();
+        }
+        else
         {
-            Debug.Log("周围没有燃烧的物品！");
+            Debug.Log("周围没有可以扑灭的物品！");
         }
     }
 }

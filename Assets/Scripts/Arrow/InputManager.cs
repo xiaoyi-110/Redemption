@@ -1,35 +1,30 @@
 using UnityEngine;
 
-public class InputManager : MonoBehaviour
+public class InputManager : MonoSingleton<InputManager>
 {
-    public static InputManager S;
 
-    private void Awake()
-    {
-        S = this;
-    }
 
     void Update()
     {
-        if (ArrowManager.S.IsInWave() == false)
+        if (ArrowManager.Instance.IsInWave() == false)
             return;
 
         if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W))
-            ArrowManager.S.TypeArrow(KeyCode.UpArrow);
+            ArrowManager.Instance.TypeArrow(KeyCode.UpArrow);
 
         if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S))
-            ArrowManager.S.TypeArrow(KeyCode.DownArrow);
+            ArrowManager.Instance.TypeArrow(KeyCode.DownArrow);
 
         if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
-            ArrowManager.S.TypeArrow(KeyCode.LeftArrow);
+            ArrowManager.Instance.TypeArrow(KeyCode.LeftArrow);
 
         if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D))
-            ArrowManager.S.TypeArrow(KeyCode.RightArrow);
+            ArrowManager.Instance.TypeArrow(KeyCode.RightArrow);
 
         // 如果玩家按下回车键，表示结束当前关卡
         if (Input.GetKeyDown(KeyCode.Return))
         {
-            ArrowManager.S.ForceFinish();   // 完成关卡
+            ArrowManager.Instance.ForceFinish();   // 完成关卡
 
         }
     }

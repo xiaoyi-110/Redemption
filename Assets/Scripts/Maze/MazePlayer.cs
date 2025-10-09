@@ -56,7 +56,7 @@ public class MazePlayer : MonoBehaviour
     private void EndTracing()
     {
         isTracking = false;
-        Debug.Log("Stop tracking mouse positions");
+        //Debug.Log("Stop tracking mouse positions");
         StartCoroutine(ResetRun());
     }
 
@@ -67,7 +67,7 @@ public class MazePlayer : MonoBehaviour
         if (Vector2.Distance(currentPos, lastPos) > minDistance)
         {
             mousePositions.Add(currentPos);
-            Debug.Log("Tracking mouse positions");
+            //Debug.Log("Tracking mouse positions");
             CheckForSpriteInteraction(currentPos);
         }
     }
@@ -82,7 +82,7 @@ public class MazePlayer : MonoBehaviour
 
         CheckForSpriteInteraction(currentPos);
         isTracking = true;
-        Debug.Log("Start tracking mouse positions");
+        //Debug.Log("Start tracking mouse positions");
     }
 
     private void CheckForSpriteInteraction(Vector2 screenPosition)
@@ -95,7 +95,7 @@ public class MazePlayer : MonoBehaviour
         if (hit.collider != null && hit.collider.CompareTag("MazeExit"))
         {
             isLocked = true;
-            Debug.Log("到达迷宫出口");
+            //Debug.Log("到达迷宫出口");
             winTheMaze = true;
         }
         //if (hit.collider == null)
@@ -108,14 +108,13 @@ public class MazePlayer : MonoBehaviour
         //}
         if (hit.collider != null && hit.collider.CompareTag("MazePath"))
         {
-            Debug.Log("a");
             hit.collider.GetComponent<SpriteRenderer>().color = Color.blue;
             if (!SRs.Contains(hit.collider.GetComponent<SpriteRenderer>()))
                 SRs.Add(hit.collider.GetComponent<SpriteRenderer>());
         }
         else if (hit.collider != null && hit.collider.CompareTag("MazeWall"))
         {
-            Debug.Log("与墙壁碰撞");
+            //Debug.Log("与墙壁碰撞");
             isLocked = true;
             StartCoroutine(ResetRunWithHitWall(hit.collider.GetComponent<SpriteRenderer>()));
         }
@@ -138,7 +137,7 @@ public class MazePlayer : MonoBehaviour
 
         for (int i = 0; i < SRs.Count; i++)
         {
-            Debug.Log(SRs.Count);
+            //Debug.Log(SRs.Count);
             SRs[i].color = Color.clear;
             yield return new WaitForSeconds(0.1f);
         }

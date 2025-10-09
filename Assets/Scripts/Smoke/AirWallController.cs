@@ -1,67 +1,54 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class AirWallController : MonoBehaviour
 {
-    public bool airWallEnabled = true;
-
     private Collider2D col2D;
-    public bool destroyAfterParticleGone = true;
-    private ParticleSystem ps;
     private PlayerController player;
+    private ParticleSystem ps;
+
+    public bool destroyAfterParticleGone = true;
 
     void Awake()
     {
-        player=FindObjectOfType<PlayerController>();
+        player = FindObjectOfType<PlayerController>();
         col2D = GetComponent<Collider2D>();
         ps = GetComponentInChildren<ParticleSystem>();
-        ApplyState();
-    }
-
-    public void SetMaskState(bool hasMask)
-    {
-        airWallEnabled = !hasMask;
-        if (hasMask == false)
-        {
-            if (!(player.equippedItem is SmokeDetector smokeDetector))
-            {
-                UIManager.Instance.ShowMessage("烟雾太浓，你无法前进");
-            }
-            else
-            {
-                UIManager.Instance.ShowMessage("危险烟雾，请佩戴防毒面具");
-            }
-        }
-            ApplyState();
-    }
-
-    private void ApplyState()
-    {
-        if (col2D != null)
-        {
-            col2D.enabled = airWallEnabled;
-        }
-
     }
 
     void Update()
     {
-        if (!GameManager.Instance.isGameStarted)
-            return;
-        if (!ps.IsAlive(true))  // 粒子全部死亡（包括子系统）
+        if (!GameManager.Instance.isGameStarted) return;
+
+        // 动态检测玩家是否佩戴防毒面具
+        bool hasGasMask = PlayerEquipmentManager.Instance.EquippedItem is GasMask;
+        col2D.enabled = !hasGasMask;
+
+        // 粒子系统检测
+        if (!ps.IsAlive(true))
         {
-            if (col2D != null)
-                col2D.enabled = false;
+            col2D.enabled = false;
 
             if (destroyAfterParticleGone)
-                Destroy(gameObject);  
+                Destroy(gameObject);
 
-            enabled = false;  
+            enabled = false;
         }
     }
 
-    void OnCollisionEnter(Collision collision)
+    private void OnCollisionEnter2D(Collision2D other)
     {
-        Debug.Log("空气墙碰撞到：" + collision.gameObject.name);
+        if (other.collider.CompareTag("Player") && col2D.enabled)
+        {
+            // 提示信息根据是否有探测器进行区分
+            if (PlayerEquipmentManager.Instance.EquippedItem is SmokeDetector)
+            {
+                UIManager.Instance.OpenPanel("MessagePanel", "危险烟雾，请佩戴防毒面具").Forget();
+            }
+            else
+            {
+                UIManager.Instance.OpenPanel("MessagePanel", "烟雾太浓，你无法前进").Forget();
+            }
+        }
     }
-
 }
