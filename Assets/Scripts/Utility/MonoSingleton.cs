@@ -44,20 +44,32 @@ public abstract class MonoSingleton<T> : MonoBehaviour where T : MonoSingleton<T
 
     protected virtual void Awake()
     {
-        if (instance != null && instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
+        //if (instance != null && instance != this)
+        //{
+        //    Destroy(gameObject);
+        //    return;
+        //}
 
-        instance = this as T;
-        if (transform.root.gameObject.name == "Managers")
+        //instance = this as T;
+        //if (transform.root.gameObject.name == "Managers")
+        //{
+        //    DontDestroyOnLoad(transform.root.gameObject);
+        //}
+        //else
+        //{
+        //    DontDestroyOnLoad(gameObject);
+        //}
+        if (instance==null)
         {
-            DontDestroyOnLoad(transform.root.gameObject);
+            instance = this as T;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
-            DontDestroyOnLoad(gameObject);
+            if(instance!=this)
+            {
+                Destroy(gameObject);
+            }
         }
     }
 

@@ -85,7 +85,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!61 &6646378187855436907
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -243,7 +243,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!61 &1872114490878380912
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -329,6 +329,8 @@ GameObject:
   - component: {fileID: 5389475872237570014}
   - component: {fileID: 7921429277979771117}
   - component: {fileID: 7140624359579471631}
+  - component: {fileID: 5579838348667210829}
+  - component: {fileID: 4970847701419066694}
   m_Layer: 7
   m_Name: MetroDoor
   m_TagString: MetroDoor
@@ -344,7 +346,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4645760569657981668}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.6591395, y: -5.4188275, z: 0.039284788}
   m_LocalScale: {x: 2.5805717, y: 2.9384542, z: 2.7857928}
   m_ConstrainProportionsScale: 0
@@ -352,7 +354,7 @@ Transform:
   - {fileID: 2232177846630426891}
   - {fileID: 4628164573078900732}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: -45, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6083919682847736068
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -367,12 +369,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentState: 1
   currentFault: 3
-  openSpeed: 1
-  openSound: {fileID: 0}
   mainCamera: {fileID: 0}
-  minDistance: 12
-  isDancing: 0
-  correctInputs: 0
+  minDistance: 14
+  faultHandler: {fileID: 0}
 --- !u!95 &5389475872237570014
 Animator:
   serializedVersion: 5
@@ -491,3 +490,27 @@ SpriteRenderer:
   m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 1
+--- !u!114 &5579838348667210829
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4645760569657981668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bc7aaab0ae3fcd4b9b8136ac6cd0196, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &4970847701419066694
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4645760569657981668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f3d64a3dc3c69d47b9b7654a600e8d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

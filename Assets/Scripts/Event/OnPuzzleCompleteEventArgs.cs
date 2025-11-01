@@ -1,18 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
-
-public class OnPuzzleCompleteEventArgs : MonoBehaviour
+public class OnPuzzleCompleteEventArgs : EventArgs
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
+    public bool Success { get; private set; }
+    public MetroDoor Door { get; private set; }
+
+    public static OnPuzzleCompleteEventArgs Create(bool success, MetroDoor door)
     {
-        
+        return new OnPuzzleCompleteEventArgs
+        {
+            Success = success,
+            Door = door
+        };
     }
 }

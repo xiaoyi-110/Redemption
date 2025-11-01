@@ -73,6 +73,7 @@ public abstract class InteractableObject : Entity
     {
         if (InventoryData.Instance.AddItem(itemData))
             {
+                AudioManager.Instance.Play("attain");
                 Debug.Log($"Picked up {itemData.itemName}. Destroying physical object.");
                 Destroy(gameObject);
             }

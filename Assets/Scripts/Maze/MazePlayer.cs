@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Cysharp.Threading.Tasks;
 
 public class MazePlayer : MonoBehaviour
 {
@@ -9,7 +11,7 @@ public class MazePlayer : MonoBehaviour
     private BoxCollider2D collder;
 
     public float speed = 5f;
-
+    public Action<bool> OnMazeExit;
 
     private List<Vector2> mousePositions = new List<Vector2>();
     private bool isTracking = false;
@@ -57,7 +59,7 @@ public class MazePlayer : MonoBehaviour
     {
         isTracking = false;
         //Debug.Log("Stop tracking mouse positions");
-        StartCoroutine(ResetRun());
+        ResetRunAsync().Forget();
     }
 
     private void ContinueTracing()
@@ -97,6 +99,7 @@ public class MazePlayer : MonoBehaviour
             isLocked = true;
             //Debug.Log("到达迷宫出口");
             winTheMaze = true;
+            OnMazeExit?.Invoke(true);
         }
         //if (hit.collider == null)
         //{
@@ -116,52 +119,30 @@ public class MazePlayer : MonoBehaviour
         {
             //Debug.Log("与墙壁碰撞");
             isLocked = true;
-            StartCoroutine(ResetRunWithHitWall(hit.collider.GetComponent<SpriteRenderer>()));
+            ResetRunWithHitWallAsync(hit.collider.GetComponent<SpriteRenderer>()).Forget();
         }
 
     }
-    private IEnumerator ResetRunWithHitWall(SpriteRenderer sr)
+    private async UniTaskVoid ResetRunWithHitWallAsync(SpriteRenderer sr)
     {
         sr.color = Color.blue;
-        yield return new WaitForSeconds(.1f);
-        StartCoroutine(ResetRun());
+        await UniTask.Delay(TimeSpan.FromSeconds(.1f)); // 延迟 0.1 秒
+        await ResetRunAsync(); // 等待清理完成
         sr.color = Color.clear;
-    }
-    private IEnumerator ResetColor(SpriteRenderer sr)
-    {
-        yield return new WaitForSeconds(0.5f);
-        sr.color = Color.clear;
-    }
-    private IEnumerator ResetRun()
-    {
 
+        failTheMaze = true; // 设置失败标记
+        OnMazeExit?.Invoke(false); // 【关键】失败时主动通知 MazeManager
+    }
+
+    private async UniTask ResetRunAsync()
+    {
         for (int i = 0; i < SRs.Count; i++)
         {
-            //Debug.Log(SRs.Count);
             SRs[i].color = Color.clear;
-            yield return new WaitForSeconds(0.1f);
+            await UniTask.Delay(TimeSpan.FromSeconds(0.1f)); // 延迟 0.1 秒
         }
         isLocked = false;
-        failTheMaze = true;
+        OnMazeExit?.Invoke(false); // 主动通知 MazeManager 失败
     }
-
-    // abadoned
-    //private void MoveCharacter()
-    //{
-    //    // 获取玩家输入
-    //    float moveX = Input.GetAxis("Horizontal");
-    //    float moveY = Input.GetAxis("Vertical");
-    //    // 计算移动方向sdaw
-    //    Vector2 moveDirection = new Vector2(moveX, moveY);
-    //    // 移动玩家
-    //    if (Input.GetKey(KeyCode.LeftShift))
-    //    {
-    //        rb.velocity = moveDirection * speed * 2; // 按住左Shift加速
-    //    }
-    //    else
-    //    {
-    //        rb.velocity = moveDirection * speed; // 恢复正常速度
-    //    }
-    //}
 
 }

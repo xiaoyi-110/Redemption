@@ -127,23 +127,44 @@ public class AudioManager : MonoSingleton<AudioManager>
             _ => 1f
         };
     }
-
-    public IEnumerator FadeIn(string id, float duration)
+    public void SetBGMState(bool isOn)
     {
-        Play(id);
-        if (!m_activeLoops.TryGetValue(id, out AudioSource source))
-        {
-            Debug.LogWarning($"No active loop found for sound ID '{id}' to fade in.");
-            yield break;
-        }
+        bgmVolume = isOn ? 0.6f : 0f;
 
-        source.volume = 0;
-        float t = 0;
-        while (t < duration)
+        UpdateGroupVolume(AudioGroup.BGM);
+    }
+    private void UpdateGroupVolume(AudioGroup groupToUpdate)
+    {
+        foreach (var kvp in m_activeLoops)
         {
-            t += Time.deltaTime;
-            source.volume = Mathf.Lerp(0, masterVolume * GetVolumeByGroup(AudioGroup.BGM), t / duration);
-            yield return null;
+            AudioSource source = kvp.Value;
+            SoundData soundData = m_soundDatabase.Get(kvp.Key);
+
+            if (soundData != null && soundData.group == groupToUpdate)
+            {
+                source.volume = soundData.volume * GetVolumeByGroup(soundData.group) * masterVolume;
+            }
+        }
+    }
+    public void SetVolume(float volume)
+    {
+        masterVolume = Mathf.Clamp01(volume);
+
+        UpdateAllActiveVolumes();
+    }
+
+    private void UpdateAllActiveVolumes()
+    {
+        foreach (var kvp in m_activeLoops)
+        {
+            AudioSource source = kvp.Value;
+
+            SoundData soundData = m_soundDatabase.Get(kvp.Key);
+            if (soundData != null)
+            {
+                // 重新应用音量计算逻辑
+                source.volume = soundData.volume * GetVolumeByGroup(soundData.group) * masterVolume;
+            }
         }
     }
 }

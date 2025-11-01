@@ -37,18 +37,18 @@ public class SettingsPanel : UIBase
 
     private void OnBGMToggle(bool isOn)
     {
-        // AudioManager.Instance.SetBGMState(isOn);
+        AudioManager.Instance.SetBGMState(isOn);
     }
 
     private void OnVolumeChange(float volume)
     {
-        // AudioManager.Instance.SetVolume(volume);
+        AudioManager.Instance.SetVolume(volume);
     }
     private async UniTaskVoid ShowTutorialTip()
     {
         // 确保先关闭设置面板，再显示提示面板，避免UI层级问题
         UIManager.Instance.ClosePanel(PanelName);
-        await UIManager.Instance.OpenPanel("TipPanel", "这是一个教程提示！");
+        await UIManager.Instance.OpenPanel("TipPanel", "按下Q键将物品收回背包，在背包可选择物品按下F键进行装备。");
     }
     private void BackToMainMenu()
     {

@@ -21,31 +21,33 @@ public class InventoryPanel : UIBase
             closeButton.onClick.AddListener(() => UIManager.Instance.ClosePanel(PanelName));
         }
     }
-    private void OnEnable()
-    {
-        if (EventManager.Instance != null)
-        {
-            EventManager.Instance.RegisterEvent<EquipItemEventArgs>(OnEquipItemEventHandler);
-            EventManager.Instance.RegisterEvent<OnInventoryUpdatedEventArgs>(OnInventoryUpdatedHandler);
-        }
-    }
+    //private void OnEnable()
+    //{
+    //    if (EventManager.Instance != null)
+    //    {
+    //        EventManager.Instance.RegisterEvent<EquipItemEventArgs>(OnEquipItemEventHandler);
+    //        EventManager.Instance.RegisterEvent<OnInventoryUpdatedEventArgs>(OnInventoryUpdatedHandler);
+    //    }
+    //}
 
 
-    private void OnDisable()
-    {
-        EventManager.Instance.UnRegisterEvent<EquipItemEventArgs>(OnEquipItemEventHandler);
-        EventManager.Instance.UnRegisterEvent<OnInventoryUpdatedEventArgs>(OnInventoryUpdatedHandler);
-    }
+    //private void OnDisable()
+    //{
+    //    EventManager.Instance.UnRegisterEvent<EquipItemEventArgs>(OnEquipItemEventHandler);
+    //    EventManager.Instance.UnRegisterEvent<OnInventoryUpdatedEventArgs>(OnInventoryUpdatedHandler);
+    //}
 
-    private void OnEquipItemEventHandler(object sender, EquipItemEventArgs args)
-    {
-        EquipHoveredItem();
-    }
+    //private void OnEquipItemEventHandler(object sender, EquipItemEventArgs args)
+    //{
+    //    EquipHoveredItem();
+    //}
 
-    private void OnInventoryUpdatedHandler(object sender,OnInventoryUpdatedEventArgs args)
-    {
-        UpdateInventoryUI();
-    }
+    //private void OnInventoryUpdatedHandler(object sender,OnInventoryUpdatedEventArgs args)
+    //{
+    //    ShowTips();
+    //    UpdateInventoryUI();
+    //}
+
     public override void OnOpen(params object[] args)
     {
         base.OnOpen(args);
@@ -61,7 +63,8 @@ public class InventoryPanel : UIBase
         TooltipManager.Instance?.gameObject.SetActive(false);
         Time.timeScale = 1; 
     }
-    private void UpdateInventoryUI()
+
+    public void UpdateInventoryUI()
     {
         var items = InventoryData.Instance.items;
         var existingSlots = itemContainer.GetComponentsInChildren<ItemSlotUI>(true).ToList();

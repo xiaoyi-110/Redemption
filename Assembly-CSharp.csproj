@@ -94,6 +94,7 @@
     <Compile Include="Assets\Scripts\Camera\RotatingCamera.cs" />
     <Compile Include="Assets\Scripts\UI\TooltipUI.cs" />
     <Compile Include="Assets\Scripts\Smoke\SmokeShapeTransition.cs" />
+    <Compile Include="Assets\Scripts\Maze\MazeLoader.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\InteractUI.cs" />
     <Compile Include="Assets\Scripts\Interactables\Window.cs" />
     <Compile Include="Assets\Scripts\Arrow\ArrowManager.cs" />
@@ -133,13 +134,13 @@
     <Compile Include="Assets\Scripts\Event\OnOptionSelectedEventArgs.cs" />
     <Compile Include="Assets\Scripts\Data\InventoryData.cs" />
     <Compile Include="Assets\Scripts\UI\HUD\EquipmentUI.cs" />
+    <Compile Include="Assets\Scripts\Entity\NPC\NPCStateBase.cs" />
     <Compile Include="Assets\Scripts\Event\OnDialogueCompleteEventArgs.cs" />
     <Compile Include="Assets\Scripts\Utility\Utility.Text.cs" />
-    <Compile Include="Assets\Scripts\Entity\NPC\NPCStateMachine.cs" />
+    <Compile Include="Assets\Scripts\MetroStructure\DoorFaultHandler.cs" />
     <Compile Include="Assets\Scripts\Data\Enums\CarryType.cs" />
     <Compile Include="Assets\Scripts\Interactables\CombustibleItem.cs" />
     <Compile Include="Assets\Scripts\UI\Overlay\SettingsPanel.cs" />
-    <Compile Include="Assets\Scripts\Entity\NPC\NPCState.cs" />
     <Compile Include="Assets\Scripts\UI\Overlay\StartPanel.cs" />
     <Compile Include="Assets\Scripts\Maze\MazeManager.cs" />
     <Compile Include="Assets\Scripts\Entity\Entity.cs" />
@@ -174,6 +175,7 @@
     <Compile Include="Assets\Scripts\Interactables\GasMask.cs" />
     <Compile Include="Assets\Scripts\Smoke\AirWallController.cs" />
     <Compile Include="Assets\Scripts\MetroStructure\MetroGround.cs" />
+    <Compile Include="Assets\Scripts\Data\GameMessages.cs" />
     <Compile Include="Assets\Scripts\UI\UIButtonBinder.cs" />
     <Compile Include="Assets\Scripts\UI\System\IntroPanelUI.cs" />
     <Compile Include="Assets\Scripts\UI\UIBase.cs" />

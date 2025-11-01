@@ -139,7 +139,6 @@ public class PlayerController : EntityActor
         if (npcToDrop != null)
         {
             npcToDrop.gameObject.SetActive(true);
-            npcToDrop.stateMachine.Initialize(carriedNPC.unconsciousState);
             npcToDrop.transform.position = transform.position + new Vector3(5f, 0, 0);
             carriedNPC = null;
         }
@@ -244,7 +243,16 @@ public class PlayerController : EntityActor
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            //ToggleSettings();
+            if (UIManager.Instance.IsPanelOpen("SettingsPanel"))
+            {
+                UIManager.Instance.ClosePanel("SettingsPanel");
+                Time.timeScale = 1f;
+            }
+            else
+            {
+                UIManager.Instance.OpenPanel("SettingsPanel").Forget();
+                Time.timeScale = 0f;
+            }
         }
     }
     private void HandleInventoryInput()

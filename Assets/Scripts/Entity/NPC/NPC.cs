@@ -2,15 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NPC : MonoBehaviour
+public class NPC : EntityActor
 {
-    public Animator anim;
     public PlayerController player;
+    private FSM<NPC> fsm;
     public enum NPCLevel { Tier1, Tier2 }
 
     [Header("NPC设置")]
     public NPCLevel npcLevel = NPCLevel.Tier1;
-    //public NPCState currentState = NPCState.Normal;
 
 
     [Header("对话设置")]
@@ -21,9 +20,7 @@ public class NPC : MonoBehaviour
     public float hallucinationDuration = 10f;
     public float unconsciousDuration = 5f;
 
-    private Coroutine stateRoutine;
-
-    public NPCStateMachine stateMachine;
+    private List<FSMStateBase<NPC>> stateList;
     public enum InitialNPCState
     {
         Normal,
@@ -40,47 +37,59 @@ public class NPC : MonoBehaviour
 
     #endregion
 
-    private void Awake()
+    protected override void Awake()
     {
-        
-        stateMachine = new NPCStateMachine();
-        hallucinatingState = new NPCHallucinatingState(this, stateMachine, "Hallucinating");
-        normalState = new NPCNormalState(this, stateMachine, "Normal");
-        unconsciousState = new NPCUnconsciousState(this, stateMachine, "Unconscious");
+        base.Awake();
+       
+    }
+
+    protected override void Start()
+    {
+        base.Start();
+        CreateFSM();
+    }
+
+    private void CreateFSM()
+    {
+        stateList = new List<FSMStateBase<NPC>>()
+        {
+            new NPCNormalState(),
+            new NPCUnconsciousState(),
+            new NPCHallucinatingState(),
+        };
+
+        fsm = new FSM<NPC>(this);
+
+        foreach (var state in stateList)
+        {
+            fsm.AddState(state);
+        }
 
         switch (initialState)
         {
             case InitialNPCState.Normal:
-                stateMachine.Initialize(normalState);
+                fsm.ChangeState<NPCNormalState>();
                 break;
             case InitialNPCState.Unconscious:
-                stateMachine.Initialize(unconsciousState);
+                fsm.ChangeState<NPCUnconsciousState>();
                 break;
             case InitialNPCState.Hallucinating:
-                stateMachine.Initialize(hallucinatingState);
+                fsm.ChangeState<NPCHallucinatingState>();
                 break;
             default:
-                Debug.LogWarning("未知初始状态");
+                fsm.ChangeState<NPCNormalState>();
                 break;
         }
     }
 
-
-    private void Update()
+    protected override void Update()
     {
-        stateMachine.currentState.Update();
+        fsm.Update();
     }
     
-
-    // 玩家交互入口
     public virtual void Interact(PlayerController player)
     {
         DialogManager.Instance.StartDialogue(npcID);
     }
 
-    public void RecoverFromEffects()
-    {
-        // 处理NPC从烟雾或其他影响中恢复的逻辑
-        Debug.Log("NPC恢复了正常状态。");
-    }
 }

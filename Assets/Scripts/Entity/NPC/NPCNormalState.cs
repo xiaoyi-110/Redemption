@@ -3,22 +3,17 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class NPCNormalState : NPCState
+public class NPCNormalState : NPCStateBase
 {
-    public NPCNormalState(NPC _enemyBase, NPCStateMachine _stateMachine, string _animBoolName) : base(_enemyBase, _stateMachine, _animBoolName)
+    public override void OnEnter(FSM<NPC> fsm)
     {
-    }
-    public override void Enter()
-    {
-        base.Enter();
+        base.OnEnter(fsm);
+        npc.Animator.SetBool("Normal", true);
     }
 
-    public override void Update()
+    public override void OnExit(FSM<NPC> fsm)
     {
-        base.Update();
-    }
-    public override void Exit()
-    {
-        base.Exit();
+        base.OnExit(fsm);
+        npc.Animator.SetBool("Normal", false);
     }
 }

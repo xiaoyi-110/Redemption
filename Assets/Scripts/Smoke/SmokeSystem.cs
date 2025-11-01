@@ -45,7 +45,6 @@ public class SmokeSystem : MonoSingleton<SmokeSystem>
         new TagLevelPair { tag = "Level3Smoke", level = SmokeLevel.Level3 }
     };
 
-    //private Dictionary<Vector2, GameObject> smokeParticles = new Dictionary<Vector2, GameObject>();
     public List<SmokeArea> activeSmoke = new List<SmokeArea>();
     private Collider2D[] smokeCache = new Collider2D[20];
     private PlayerController player;
@@ -179,24 +178,6 @@ public class SmokeSystem : MonoSingleton<SmokeSystem>
     }
     #endregion
 
-    #region 调试工具
-
-
-    #endregion
-
-    #region 交互设置
-    private void ClearNearbyEffects(Vector2 position)
-    {
-        Collider2D[] npcs = Physics2D.OverlapCircleAll(position, 2f, LayerMask.GetMask("NPC"));
-        foreach (var npc in npcs)
-        {
-            NPC npcController = npc.GetComponent<NPC>();
-            if (npcController != null)
-            {
-                npcController.RecoverFromEffects();
-            }
-        }
-    }
     public void HandleCharacterEnterSmoke(PlayerController player, Vector2 position)
     {
         if (player == null)
@@ -229,5 +210,4 @@ public class SmokeSystem : MonoSingleton<SmokeSystem>
                 break;
         }
     }
-    #endregion
 }

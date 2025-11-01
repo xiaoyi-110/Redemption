@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Clothing
   itemIcon: {fileID: 21300000, guid: 48738480ba4fcab45b9330323d605cb5, type: 3}
-  itemDescription: "\u8863\u670D"
+  itemDescription: "\u8863\u670D\uFF0C\u6309\u4E0BF\u4F7F\u7528"
   carryType: 3
   useTrigger: 0
   destroyOnUse: 1

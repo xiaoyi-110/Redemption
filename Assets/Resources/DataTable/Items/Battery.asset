@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Battery
   itemIcon: {fileID: 21300000, guid: 23050053af2c67a49ba0692525816a7d, type: 3}
-  itemDescription: "\u7535\u6C60\uFF0C\u6309\u4E0BF\u4F7F\u7528\uFF0C\u53EF\u7ED9\u95E8\u901A\u7535"
+  itemDescription: "\u7535\u6C60\uFF0C\u6309\u4E0BF\u4F7F\u7528"
   carryType: 3
   useTrigger: 0
   destroyOnUse: 1

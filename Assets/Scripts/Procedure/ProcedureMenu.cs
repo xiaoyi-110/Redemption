@@ -19,10 +19,8 @@ public class ProcedureMenu : ProcedureBase
 
         Debug.Log("[ProcedureMenu] Enter Menu Procedure.");
 
-        // LevelManager.Instance.QuitGame();
-        // AudioManager.Instance.Stop("BGM_Victory");
-        // AudioManager.Instance.Play("BGM_Main");
-        // UIManager.Instance.ShowUIForm("MenuForm");
+        AudioManager.Instance.Play("BGM");
+        AudioManager.Instance.Play("flame");
     }
 
     public override void OnExit(FSM<ProcedureManager> fsm)

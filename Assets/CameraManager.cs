@@ -8,10 +8,10 @@ public class CameraManager : MonoBehaviour
 {
 
     [SerializeField] Camera mainCamera;
-    public static CameraManager instance;
+    public static CameraManager Instance;
     private void Awake()
     {
-        instance = this;
+        Instance = this;
     }
 
     public void OnSceneLoaded(Scene scene, LoadSceneMode mode)

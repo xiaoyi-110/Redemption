@@ -4,10 +4,10 @@ using UnityEngine.UI;
 public class Arrow : MonoBehaviour
 {
     public Sprite[] ArrowSprites;
-    private Image m_image;
+    private Image _image;
 
     [HideInInspector]
-    public int arrowDir;
+    public int ArrowDir;
 
     public Color FinishColor;  
     public Color ErrorColor;
@@ -15,33 +15,33 @@ public class Arrow : MonoBehaviour
 
     void Awake()
     {
-        m_image = GetComponent<Image>();
+        _image = GetComponent<Image>();
     }
 
     public void Setup(int dir)
     {
         ResetState();
-        arrowDir = dir;
+        ArrowDir = dir;
         if (ArrowSprites != null && dir >= 0 && dir < ArrowSprites.Length)
         {
-            m_image.sprite = ArrowSprites[dir];
-            m_image.SetNativeSize();
+            _image.sprite = ArrowSprites[dir];
+            _image.SetNativeSize();
         }
     }
 
     private void ResetState()
     {
-        m_image.color = DefaultColor;
+        _image.color = DefaultColor;
 
-        m_image.sprite = null;
+        _image.sprite = null;
     }
     public void SetToFinishState()
     {
-        m_image.color = FinishColor;
+        _image.color = FinishColor;
     }
 
     public void SetToErrorState()
     {
-        m_image.color = ErrorColor;
+        _image.color = ErrorColor;
     }
 }

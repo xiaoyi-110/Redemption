@@ -9,9 +9,9 @@ public class PlayerCrawlingState : PlayerStateBase
     public override void OnEnter(FSM<PlayerController> fsm)
     {
         base.OnEnter(fsm);
+        AudioManager.Instance.Play("crawl");
         player.speedMultiplier = 0.6f;
         player.Animator.SetBool("IsCrawling", true);
-        player.Animator.SetFloat("CrawlSpeed", 0);
     }
 
     public override void OnUpdate(FSM<PlayerController> fsm)
@@ -26,6 +26,7 @@ public class PlayerCrawlingState : PlayerStateBase
     public override void OnExit(FSM<PlayerController> fsm)
     {
         base.OnExit(fsm);
+        AudioManager.Instance.Stop("crawl");
         player.Animator.SetBool("IsCrawling", false);
     }
 }

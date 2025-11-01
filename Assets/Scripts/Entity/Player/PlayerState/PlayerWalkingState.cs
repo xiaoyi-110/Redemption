@@ -8,7 +8,7 @@ public class PlayerWalkingState : PlayerStateBase
         base.OnEnter(fsm);
         player.Animator.SetBool("IsWalking", true);
         player.speedMultiplier = 1f;
-        //AudioManager.Instance.Play("Step");
+        AudioManager.Instance.Play("walk");
     }
 
     public override void OnUpdate(FSM<PlayerController> fsm)
@@ -40,6 +40,6 @@ public class PlayerWalkingState : PlayerStateBase
         player.Animator.SetBool("IsWalking", false);
         player.Animator.SetFloat("Speed", 0);
         //player.movement = Vector2.zero;
-        //AudioManager.Instance.Stop("Step");
+        AudioManager.Instance.Stop("walk");
     }
 }

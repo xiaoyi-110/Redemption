@@ -12,4 +12,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d97ea75a6cf643144a900ab4876997cd, type: 3}
   m_Name: SoundDatabase
   m_EditorClassIdentifier: 
-  sounds: []
+  sounds:
+  - id: BGM
+    clip: {fileID: 8300000, guid: 151fa7e808530624bbd4e04517af7a97, type: 3}
+    group: 0
+    volume: 0.6
+    pitch: 1
+    loop: 1
+  - id: attain
+    clip: {fileID: 8300000, guid: 5e0a3dae69e66aa48895fd11ffc8264e, type: 3}
+    group: 1
+    volume: 0.8
+    pitch: 1
+    loop: 0
+  - id: walk
+    clip: {fileID: 8300000, guid: 67bfb4020a7b24347825d114c3bb47c2, type: 3}
+    group: 1
+    volume: 0.8
+    pitch: 1
+    loop: 1
+  - id: crawl
+    clip: {fileID: 8300000, guid: 16ed9244ea18bdc4d9276c6a498d70dd, type: 3}
+    group: 1
+    volume: 0.8
+    pitch: 1
+    loop: 1
+  - id: flame
+    clip: {fileID: 8300000, guid: aaf65348a501c8d4283233ac3cdd6af9, type: 3}
+    group: 0
+    volume: 0.4
+    pitch: 1
+    loop: 1

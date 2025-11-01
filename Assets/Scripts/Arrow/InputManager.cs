@@ -21,11 +21,5 @@ public class InputManager : MonoSingleton<InputManager>
         if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D))
             ArrowManager.Instance.TypeArrow(KeyCode.RightArrow);
 
-        // 如果玩家按下回车键，表示结束当前关卡
-        if (Input.GetKeyDown(KeyCode.Return))
-        {
-            ArrowManager.Instance.ForceFinish();   // 完成关卡
-
-        }
     }
 }

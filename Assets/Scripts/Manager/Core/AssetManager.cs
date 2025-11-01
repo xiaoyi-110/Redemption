@@ -6,48 +6,56 @@ using Object = UnityEngine.Object;
 
 public class AssetManager : MonoSingleton<AssetManager>
 {
-    private List<ResourceRequest> m_LoadingTasks = new List<ResourceRequest>();
+    private List<ResourceRequest> _LoadingTasks = new List<ResourceRequest>();
 
-    private Action m_OnAllTasksCompleted;
+    private Action _OnAllTasksCompleted;
 
     public SoundDatabase LoadedSoundDatabase { get; private set; }
-
+    public TextAsset LoadedGameMessagesJson { get; private set; }
     public void LoadInitialAssetsAsync(Action onComplete)
     {
-        m_OnAllTasksCompleted = onComplete;
-        m_LoadingTasks.Clear();
+        _OnAllTasksCompleted = onComplete;
+        _LoadingTasks.Clear();
 
         ResourceRequest soundDatabaseRequest = Resources.LoadAsync<SoundDatabase>("DataTable/SoundDatabase");
-        m_LoadingTasks.Add(soundDatabaseRequest);
-
+        _LoadingTasks.Add(soundDatabaseRequest);
+        ResourceRequest gameMessagesRequest = Resources.LoadAsync<TextAsset>("DataTable/GameMessages");
+        _LoadingTasks.Add(gameMessagesRequest);
         StartCoroutine(CheckLoadingProgress());
     }
 
     private IEnumerator CheckLoadingProgress()
     {
-        foreach (var task in m_LoadingTasks)
+        foreach (var task in _LoadingTasks)
         {
             yield return task;
         }
 
         ProcessLoadedAssets();
 
-        if (m_OnAllTasksCompleted != null)
+        if (_OnAllTasksCompleted != null)
         {
-            m_OnAllTasksCompleted.Invoke();
+            _OnAllTasksCompleted.Invoke();
         }
 
-        m_LoadingTasks.Clear();
+        _LoadingTasks.Clear();
     }
 
     private void ProcessLoadedAssets()
     {
-        foreach (var request in m_LoadingTasks)
+        foreach (var request in _LoadingTasks)
         {
             if (request.asset is SoundDatabase soundDatabase)
             {
                 LoadedSoundDatabase = soundDatabase;
             }
-        }
+            else if (request.asset is TextAsset textAsset)
+            {
+                if (request.asset.name == "GameMessages") 
+                {
+                    LoadedGameMessagesJson = textAsset;
+                }
+            }
+            }
     }
 }

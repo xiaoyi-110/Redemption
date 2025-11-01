@@ -1,11 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 
 public class ArrowManager : MonoSingleton<ArrowManager>
 {
 
     [Header("箭头配置")]
-    public GameObject arrowPrefab;
+    public GameObject ArrowPrefab;
     public Transform arrowsHolder;
 
     [Header("音效")]
@@ -16,9 +19,11 @@ public class ArrowManager : MonoSingleton<ArrowManager>
     private Arrow currentArrow;
     private MetroDoor currentDoor;
 
-    public float waveTime = 9f;
+    private float waveTime = 9f;
     private bool isFinish;
-
+    private int _currentCorrectInputs;
+    private int _totalArrowCount;
+    private CancellationTokenSource waveCts;
     private void Start()
     {
         ClearWave();
@@ -32,14 +37,19 @@ public class ArrowManager : MonoSingleton<ArrowManager>
         isFinish = false;
         currentDoor = door;
 
+        _currentCorrectInputs = 0;
+        _totalArrowCount = length;
+
+        waveCts = new CancellationTokenSource();
+        StartTimerAsync(waveCts.Token).Forget();
+
         for (int i = 0; i < length; i++)
         {
-            GameObject arrowObj = ObjectPoolManager.Instance.GetObject(arrowPrefab);
+            GameObject arrowObj = ObjectPoolManager.Instance.GetObject(ArrowPrefab);
             arrowObj.transform.SetParent(arrowsHolder);
             
-
             Arrow arrow = arrowObj.GetComponent<Arrow>();
-            int randomDir = Random.Range(0, 4);
+            int randomDir = UnityEngine.Random.Range(0, 4);
             arrow.Setup(randomDir);
             arrowObj.transform.localPosition += new Vector3(i * 100, 0, 0);
             arrows.Enqueue(arrow);
@@ -51,50 +61,70 @@ public class ArrowManager : MonoSingleton<ArrowManager>
             currentArrow = null;
     }
 
+    private async UniTask StartTimerAsync(CancellationToken token)
+    {
+        try
+        {
+            await UniTask.Delay(System.TimeSpan.FromSeconds(waveTime), ignoreTimeScale: false, cancellationToken: token);
+            if (!token.IsCancellationRequested)
+            {
+                await TriggerPuzzleCompleteEvent(false);
+            }                
+        }
+        catch (OperationCanceledException)
+        {
+            // 波被提前结束，取消计时
+        }
+    }
+
     public void TypeArrow(KeyCode inputKey)
     {
         if (isFinish || currentArrow == null)
             return;
 
-        bool correct = ConvertKeyCodeToInt(inputKey) == currentArrow.arrowDir;
+        bool correct = ConvertKeyCodeToInt(inputKey) == currentArrow.ArrowDir;
 
         if (correct)
         {
             currentArrow.SetToFinishState();
+            _currentCorrectInputs++;
         }
         else
         {
             currentArrow.SetToErrorState();
         }
 
-        currentDoor?.RecordInput(correct);
-
+        //currentDoor?.RecordInput(correct);
         if (arrows.Count > 0)
             currentArrow = arrows.Dequeue();
         else
         {
-            isFinish = true;
+            bool puzzleSuccess = (_currentCorrectInputs == _totalArrowCount);
+            TriggerPuzzleCompleteEvent(puzzleSuccess).Forget();
             //Debug.Log($"箭头波完成，总正确数: {currentDoor?.correctInputs}");
         }
     }
 
-    public void ForceFinish()
+    private async UniTask TriggerPuzzleCompleteEvent(bool success)
     {
-        if (!isFinish)
-        {
-            currentDoor?.FinishWave();
-            ClearWave();
-        }
+        if (currentDoor == null) return;
+        waveCts?.Cancel();
+        isFinish = true;
+        EventManager.Instance.TriggerEvent(this, OnPuzzleCompleteEventArgs.Create(success, currentDoor));
+        await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
+        ClearWave();
     }
 
     public void ClearWave()
     {
+        waveCts?.Cancel();
+        waveCts?.Dispose();
+        waveCts = null;
         for (int i = arrowsHolder.childCount - 1; i >= 0; i--)
         {
             Transform arrow = arrowsHolder.GetChild(i);
-            ObjectPoolManager.Instance.ReturnObject(arrowPrefab, arrow.gameObject);
+            ObjectPoolManager.Instance.ReturnObject(ArrowPrefab, arrow.gameObject);
         }
-
 
         arrows.Clear();
         currentArrow = null;

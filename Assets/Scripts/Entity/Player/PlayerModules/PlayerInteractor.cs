@@ -273,7 +273,7 @@ public class PlayerInteractor : MonoBehaviour
 
         OnDoorPowered?.Invoke(door);
     }
-    private void CheckPoweredDoor()
+    private async void CheckPoweredDoor()
     {
         if (Input.GetKeyDown(KeyCode.F) && poweredDoor != null)
         {
@@ -290,7 +290,7 @@ public class PlayerInteractor : MonoBehaviour
                 }
                 else if (door.currentFault == MetroDoor.FaultType.Type5)
                 {
-                    StartCoroutine(door.HandleMazePuzzleWithNoChange(door));
+                    await door.faultHandler.HandleMazePuzzleWithNoChangeAsync(door);
                 }
 
                 door.TryInteract();

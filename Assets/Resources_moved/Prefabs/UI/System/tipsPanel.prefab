@@ -157,7 +157,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u6309\u4E0BQ\u952E\u5C06\u7269\u54C1\u4E22\u5F03\uFF0C\u6309\u4E0BE\u952E\u5C06\u7269\u54C1\u6536\u56DE\u80CC\u5305\uFF0C\u5728\u80CC\u5305\u53EF\u9009\u62E9\u7269\u54C1\u6309\u4E0BF\u952E\u8FDB\u884C\u88C5\u5907\u3002"
+  m_Text: "\u6309\u4E0BQ\u952E\u5C06\u7269\u54C1\u6536\u56DE\u80CC\u5305\uFF0C\u5728\u80CC\u5305\u53EF\u9009\u62E9\u7269\u54C1\u6309\u4E0BF\u952E\u8FDB\u884C\u88C5\u5907\u3002"
 --- !u!1 &5510763347012433869
 GameObject:
   m_ObjectHideFlags: 0
@@ -169,7 +169,7 @@ GameObject:
   - component: {fileID: 645472196367596457}
   - component: {fileID: 7914562901891955246}
   - component: {fileID: 1079116932406838692}
-  - component: {fileID: 3448271702716118855}
+  - component: {fileID: 7576099100779320496}
   m_Layer: 5
   m_Name: tipsPanel
   m_TagString: Untagged
@@ -184,7 +184,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5510763347012433869}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -226,8 +226,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 1623887631, guid: 7ac5dcc3cc1bb30429189151b904592a, type: 3}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: 7ac5dcc3cc1bb30429189151b904592a, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -236,7 +236,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &3448271702716118855
+--- !u!114 &7576099100779320496
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -245,7 +245,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5510763347012433869}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4168d684b967a84469939673164c342e, type: 3}
+  m_Script: {fileID: 11500000, guid: 717874bb1e25f6d4eb7d543062a1eac2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   tipText: {fileID: 723207712775041078}

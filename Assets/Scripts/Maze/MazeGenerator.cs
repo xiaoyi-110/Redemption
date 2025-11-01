@@ -119,7 +119,7 @@ public class MazeGenerator : MonoBehaviour
 
         Vector3 endPos = new Vector3(endCell.x * cellSize + offsetX, endCell.y * cellSize + offsetZ, 0);
         mazeRenderer.RenderStartAndEnd(startPos, endPos);
-        GameObject p = Instantiate(MazeManager.instance.playerPrefab, startPos, Quaternion.identity);
+        GameObject p = Instantiate(MazeManager.Instance.playerPrefab, startPos, Quaternion.identity);
         return p.GetComponent<MazePlayer>();
     }
 
